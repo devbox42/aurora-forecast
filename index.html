@@ -83,23 +83,15 @@
       animation: fadeInUp 0.6s ease forwards 0.1s;
     }
 
-    .status-time-label {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: #6b7280;
-      margin-bottom: 12px;
-    }
-
     .status-indicator {
-      width: 100px;
-      height: 100px;
+      width: 90px;
+      height: 90px;
       border-radius: 50%;
-      margin: 0 auto 16px;
+      margin: 0 auto 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2.5rem;
+      font-size: 2.2rem;
       transition: all 0.3s ease;
     }
 
@@ -123,9 +115,9 @@
     }
 
     .status-text {
-      font-size: 1.5rem;
+      font-size: 1.3rem;
       font-weight: 700;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
       letter-spacing: 0.02em;
     }
 
@@ -133,10 +125,44 @@
     .possible-text { color: #facc15; }
     .unlikely-text { color: #9ca3af; }
 
-    .status-subtitle {
+    /* G-Scale Badge */
+    .g-scale-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: 0.05em;
+    }
+
+    .g-scale-badge.g0 { background: #1f2937; color: #9ca3af; }
+    .g-scale-badge.g1 { background: #166534; color: #86efac; }
+    .g-scale-badge.g2 { background: #854d0e; color: #fde047; }
+    .g-scale-badge.g3 { background: #9a3412; color: #fdba74; }
+    .g-scale-badge.g4 { background: #991b1b; color: #fca5a5; }
+    .g-scale-badge.g5 { background: #7f1d1d; color: #fecaca; }
+
+    /* Peak Window */
+    .peak-window {
+      background: #0d0d18;
+      border-radius: 10px;
+      padding: 10px 16px;
+      margin-bottom: 16px;
+    }
+
+    .peak-window span {
       color: #9ca3af;
-      font-size: 1rem;
-      line-height: 1.4;
+      font-size: 0.9rem;
+    }
+
+    .peak-window .peak-time {
+      color: #4ade80;
+      font-weight: 600;
+    }
+
+    .peak-window.no-peak {
+      opacity: 0.6;
     }
 
     /* Stats Row */
@@ -165,109 +191,6 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
       margin-top: 2px;
-    }
-
-    /* Tonight Section */
-    .tonight-section {
-      background: linear-gradient(145deg, #12121a 0%, #1a1a2e 100%);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 20px;
-      border: 1px solid #252540;
-      opacity: 0;
-      animation: fadeInUp 0.6s ease forwards 0.15s;
-    }
-
-    .tonight-header {
-      font-size: 0.8rem;
-      color: #6b7280;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-weight: 500;
-      margin-bottom: 12px;
-      text-align: center;
-    }
-
-    .tonight-slots {
-      display: flex;
-      justify-content: space-around;
-      gap: 8px;
-    }
-
-    .tonight-slot {
-      flex: 1;
-      text-align: center;
-      padding: 12px 8px;
-      background: #0a0a12;
-      border-radius: 12px;
-    }
-
-    .tonight-time {
-      font-size: 0.7rem;
-      color: #6b7280;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .tonight-prob {
-      font-size: 1.4rem;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    .tonight-prob.good { color: #4ade80; }
-    .tonight-prob.possible { color: #facc15; }
-    .tonight-prob.unlikely { color: #6b7280; }
-
-    .tonight-cloud {
-      font-size: 1.1rem;
-    }
-
-    .dark-window {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 10px;
-      margin-bottom: 12px;
-      background: #0d0d18;
-      border-radius: 10px;
-      font-size: 0.9rem;
-    }
-
-    .dark-icon {
-      font-size: 1.1rem;
-    }
-
-    .dark-window-text {
-      color: #9ca3af;
-      font-weight: 500;
-    }
-
-    .dark-window.no-darkness {
-      background: #1a1a0d;
-    }
-
-    .dark-window.no-darkness .dark-window-text {
-      color: #ca8a04;
-    }
-
-    .tonight-best {
-      text-align: center;
-      margin-top: 12px;
-      font-size: 0.85rem;
-      color: #9ca3af;
-      padding-top: 12px;
-      border-top: 1px solid #252540;
-    }
-
-    .tonight-best:empty {
-      display: none;
-    }
-
-    .tonight-best strong {
-      color: #4ade80;
     }
 
     /* Chart Section */
@@ -434,20 +357,6 @@
     .slot-bar.possible { background: linear-gradient(to top, #ca8a04, #eab308); }
     .slot-bar.unlikely { background: linear-gradient(to top, #374151, #4b5563); }
 
-    .slot-percent {
-      font-size: 0.7rem;
-      font-weight: 600;
-      color: #fff;
-      margin-bottom: 4px;
-      min-height: 14px;
-    }
-
-    .slot-cloud {
-      font-size: 0.9rem;
-      min-height: 18px;
-      margin-bottom: 4px;
-    }
-
     .slot-time {
       font-size: 0.7rem;
       color: #6b7280;
@@ -503,87 +412,68 @@
       font-weight: 500;
     }
 
-    /* Legend */
-    .chart-legend {
+    /* Swipe Hint */
+    .swipe-hint {
+      font-size: 0.7rem;
+      color: #4b5563;
+      font-style: italic;
+    }
+
+    /* Action Chips */
+    .action-chips {
       display: flex;
       justify-content: center;
-      gap: 16px;
-      margin-top: 12px;
-      flex-wrap: wrap;
-    }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.75rem;
-      color: #6b7280;
-    }
-
-    .legend-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 2px;
-    }
-
-    .legend-dot.good { background: #22c55e; }
-    .legend-dot.possible { background: #eab308; }
-    .legend-dot.unlikely { background: #4b5563; }
-
-    /* Location Button */
-    .location-section {
+      gap: 10px;
+      margin-top: 16px;
       opacity: 0;
       animation: fadeInUp 0.6s ease forwards 0.3s;
     }
 
-    .location-btn {
-      width: 100%;
-      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-      color: #fff;
-      border: none;
-      padding: 16px 24px;
-      border-radius: 14px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
+    .action-chip {
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 10px;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 20px #1e40af44;
-    }
-
-    .location-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 30px #1e40af66;
-    }
-
-    .location-btn:active {
-      transform: translateY(0);
-    }
-
-    .location-btn:disabled {
-      background: #374151;
-      box-shadow: none;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .location-btn svg {
-      width: 20px;
-      height: 20px;
-    }
-
-    .location-status {
-      text-align: center;
-      margin-top: 12px;
+      gap: 6px;
+      padding: 10px 16px;
+      background: #1a1a2a;
+      border: 1px solid #252540;
+      border-radius: 20px;
+      color: #9ca3af;
       font-size: 0.85rem;
-      color: #6b7280;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
 
-    .location-status.has-location {
-      color: #4ade80;
+    .action-chip:hover {
+      background: #252540;
+      color: #e5e5e5;
+    }
+
+    .action-chip:active {
+      transform: scale(0.97);
+    }
+
+    .action-chip svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .action-chip.active {
+      background: linear-gradient(135deg, #166534 0%, #22c55e 100%);
+      border-color: #22c55e;
+      color: #fff;
+    }
+
+    .action-chip.location-set {
+      background: #1e3a5f;
+      border-color: #3b82f6;
+      color: #93c5fd;
+    }
+
+    .action-chip.alerts-on {
+      background: #3b0764;
+      border-color: #a855f7;
+      color: #d8b4fe;
     }
 
     /* Loading State */
@@ -924,25 +814,28 @@
       </div>
 
       <div class="status-card">
-        <div id="status-time-label" class="status-time-label">Right Now</div>
         <div id="status-indicator" class="status-indicator status-unlikely">
           <span id="status-emoji">🌙</span>
         </div>
         <div id="status-text" class="status-text unlikely-text">Checking...</div>
-        <div id="status-subtitle" class="status-subtitle">Analyzing conditions</div>
+        <div id="g-scale-badge" class="g-scale-badge g0">G0</div>
+
+        <div id="peak-window" class="peak-window">
+          <span id="peak-window-text">--</span>
+        </div>
 
         <div class="stats-row">
           <div class="stat-item">
-            <div id="stat-chance" class="stat-value">--%</div>
-            <div id="stat-now-label" class="stat-label">Now</div>
+            <div id="stat-kp" class="stat-value">--</div>
+            <div class="stat-label">Kp</div>
           </div>
           <div class="stat-item">
-            <div id="stat-clouds" class="stat-value">--</div>
-            <div id="stat-sky-label" class="stat-label">Sky</div>
+            <div id="stat-clouds" class="stat-value">--%</div>
+            <div id="stat-sky-label" class="stat-label">Clouds</div>
           </div>
           <div class="stat-item">
-            <div id="stat-direction" class="stat-value">N</div>
-            <div id="stat-look-label" class="stat-label">Look</div>
+            <div id="stat-moon" class="stat-value">--%</div>
+            <div id="stat-moon-label" class="stat-label">Moon</div>
           </div>
         </div>
       </div>
@@ -1030,74 +923,43 @@
         </div>
       </div>
 
-      <div id="tonight-section" class="tonight-section">
-        <div id="tonight-header" class="tonight-header">Tonight's Forecast</div>
-        <div id="dark-window" class="dark-window">
-          <span class="dark-icon">🌌</span>
-          <span id="dark-window-text" class="dark-window-text">--:-- → --:--</span>
-        </div>
-        <div class="tonight-slots">
-          <div class="tonight-slot">
-            <div class="tonight-time" id="tonight-time-1">Evening</div>
-            <div class="tonight-prob" id="tonight-prob-1">--%</div>
-            <div class="tonight-cloud" id="tonight-cloud-1">--</div>
-          </div>
-          <div class="tonight-slot">
-            <div class="tonight-time" id="tonight-time-2">Midnight</div>
-            <div class="tonight-prob" id="tonight-prob-2">--%</div>
-            <div class="tonight-cloud" id="tonight-cloud-2">--</div>
-          </div>
-          <div class="tonight-slot">
-            <div class="tonight-time" id="tonight-time-3">Late Night</div>
-            <div class="tonight-prob" id="tonight-prob-3">--%</div>
-            <div class="tonight-cloud" id="tonight-cloud-3">--</div>
-          </div>
-        </div>
-        <div class="tonight-best" id="tonight-best"></div>
-      </div>
-
       <div class="chart-section">
         <div class="section-header">
-          <span id="chart-title" class="section-title">10-Day Timeline</span>
+          <span id="chart-title" class="section-title">Next 48 Hours</span>
+          <span id="swipe-hint" class="swipe-hint">← history</span>
         </div>
-        <div id="chart-container" class="chart-container scroll-right">
+        <div id="chart-container" class="chart-container">
           <div id="chart-scroll" class="chart-scroll">
             <div id="chart-grid" class="chart-grid">
               <!-- Generated by JS -->
             </div>
           </div>
-          <div id="scroll-hint" class="scroll-hint">→</div>
         </div>
-        <div class="chart-legend">
-          <div class="legend-item"><div class="legend-dot good"></div> <span id="legend-good">Good chance</span></div>
-          <div class="legend-item"><div class="legend-dot possible"></div> <span id="legend-possible">Possible</span></div>
-          <div class="legend-item"><div class="legend-dot unlikely"></div> <span id="legend-unlikely">Unlikely</span></div>
-        </div>
-        <div id="tap-hint" class="tap-hint hidden"><span id="tap-hint-text">Tap bars for details</span></div>
         <div id="update-time" class="update-time"></div>
       </div>
 
-      <div class="location-section">
-        <button id="location-btn" class="location-btn">
+      <!-- Compact Action Chips -->
+      <div class="action-chips">
+        <button id="location-chip" class="action-chip" onclick="handleLocation()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <circle cx="12" cy="12" r="3"/>
             <path d="M12 2v3m0 14v3m10-10h-3M5 12H2"/>
           </svg>
-          <span id="location-btn-text">Enable Location</span>
+          <span id="location-chip-text">Location</span>
         </button>
-        <div id="location-status" class="location-status"></div>
-      </div>
-
-      <!-- Notification Button -->
-      <div id="notification-section" class="location-section hidden" style="margin-top: 12px;">
-        <button id="notification-btn" class="location-btn" style="background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); box-shadow: 0 4px 20px #7c3aed44;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width: 20px; height: 20px;">
+        <button id="notification-chip" class="action-chip hidden">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
             <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
           </svg>
-          <span id="notification-btn-text">Enable Alerts</span>
+          <span id="notification-chip-text">Alerts</span>
         </button>
-        <div id="notification-status" class="location-status"></div>
+        <button id="refresh-chip" class="action-chip" onclick="init()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M21 12a9 9 0 11-2.636-6.364"/>
+            <path d="M21 3v6h-6"/>
+          </svg>
+        </button>
       </div>
     </main>
 
@@ -1205,6 +1067,7 @@
         // Notifications
         enableAlerts: 'Enable Alerts',
         alertsEnabled: 'Alerts enabled',
+        alertsOn: 'On',
         alertsDenied: 'Notifications blocked',
         alertsNotSupported: 'Notifications not supported',
         kpSpikeTitle: 'Aurora Alert!',
@@ -1299,6 +1162,7 @@
         // Notifications
         enableAlerts: 'Benachrichtigungen',
         alertsEnabled: 'Aktiv',
+        alertsOn: 'An',
         alertsDenied: 'Benachrichtigungen blockiert',
         alertsNotSupported: 'Nicht unterstützt',
         kpSpikeTitle: 'Polarlicht-Alarm!',
@@ -1393,6 +1257,7 @@
         // Notifications
         enableAlerts: 'Activar alertas',
         alertsEnabled: 'Alertas activas',
+        alertsOn: 'On',
         alertsDenied: 'Notificaciones bloqueadas',
         alertsNotSupported: 'No soportado',
         kpSpikeTitle: '¡Alerta de aurora!',
@@ -1445,8 +1310,8 @@
     const updateTimeEl = $('update-time');
     const pullIndicator = $('pull-indicator');
     const pullText = $('pull-text');
-    const locationBtn = $('location-btn');
-    const locationBtnText = $('location-btn-text');
+    const locationChip = $('location-chip');
+    const locationChipText = $('location-chip-text');
     const locationStatus = $('location-status');
     const tooltip = $('tooltip');
 
@@ -1954,7 +1819,7 @@
       tooltip.classList.remove('visible');
     }
 
-    // Build chart with historical data
+    // Build simplified chart (focused on future)
     function renderChart() {
       const now = new Date();
       const slots = [];
@@ -1965,22 +1830,19 @@
       const utcAlignedHour = Math.floor(utcHour / 3) * 3;
       currentBlock.setUTCHours(utcAlignedHour, 0, 0, 0);
 
-      // Start 7 days (56 slots × 3h = 168h) before current block
-      let slotTime = new Date(currentBlock.getTime() - 56 * 3 * 60 * 60 * 1000);
+      // Start 24 hours (8 slots) before current block for context
+      let slotTime = new Date(currentBlock.getTime() - 8 * 3 * 60 * 60 * 1000);
 
-      // 80 slots total: 56 historical + 24 forecast = 240 hours (10 days)
+      // 32 slots: 8 historical + 24 forecast = 96 hours (4 days)
       let nowSlotIndex = -1;
-      for (let i = 0; i < 80; i++) {
+      for (let i = 0; i < 32; i++) {
         const localHour = slotTime.getHours();
-        // Use actual sunset/sunrise if available, otherwise fallback to hour check
         const isNight = isDarkAt(slotTime);
         const kp = getKpAt(slotTime);
         const isPast = slotTime < currentBlock;
-        // No cloud data for historical (Open-Meteo doesn't provide it)
         const cloud = isPast ? null : getCloudAt(slotTime);
         const prob = calcProbability(kp, isNight, userLocation?.lat);
 
-        // Track which slot is "now"
         if (slotTime.getTime() === currentBlock.getTime()) {
           nowSlotIndex = i;
         }
@@ -1992,7 +1854,6 @@
       let lastDay = null;
       chartGrid.innerHTML = slots.map((slot, i) => {
         const status = getStatus(slot.prob);
-        const cloudInfo = getCloudInfo(slot.cloud, slot.isNight);
         const dayStr = slot.time.toDateString();
         const showDay = dayStr !== lastDay;
         lastDay = dayStr;
@@ -2006,12 +1867,10 @@
                onmouseenter="showTooltip(event, chartSlots[${i}])"
                onmouseleave="hideTooltip()">
             ${isNowSlot ? `<div class="now-marker">${t.now}</div>` : ''}
-            <div class="slot-percent">${slot.prob > 0 ? slot.prob + '%' : ''}</div>
             <div class="slot-bar-container">
               <div class="slot-bar ${status} animate" data-height="${slot.prob}"></div>
             </div>
-            <div class="slot-cloud">${slot.isPast && slot.cloud === null ? '·' : cloudInfo.icon}</div>
-            <div class="slot-time">${String(slot.hour).padStart(2, '0')}:00</div>
+            <div class="slot-time">${String(slot.hour).padStart(2, '0')}</div>
             ${showDay ? `<div class="slot-day">${formatDay(slot.time)}</div>` : '<div class="slot-day"></div>'}
           </div>
         `;
@@ -2027,168 +1886,21 @@
           setTimeout(() => {
             bar.style.height = bar.dataset.height + '%';
             bar.classList.remove('animate');
-          }, i * 15); // Fast animation for many bars
+          }, i * 25);
         });
       });
 
-      // Scroll to NOW position after render (NOW on left side for future visibility)
+      // Scroll to NOW position
       setTimeout(() => {
         if (nowSlotIndex >= 0) {
           const nowEl = chartGrid.querySelector('.is-now');
           if (nowEl) {
-            // Position NOW near left edge (with small padding)
             const scrollPos = nowEl.offsetLeft - 20;
             chartScroll.scrollLeft = Math.max(0, scrollPos);
           }
         }
         updateScrollIndicators();
       }, 100);
-    }
-
-    // Render tonight's forecast section with actual dark hours
-    function renderTonightForecast() {
-      const now = new Date();
-      const hour = now.getHours();
-      const darkWindowEl = $('dark-window');
-      const darkWindowText = $('dark-window-text');
-
-      // Get tonight's dark window
-      const today = new Date(now);
-      today.setHours(12, 0, 0, 0);
-
-      // If it's after midnight but before sunrise, use yesterday's date for the dark window
-      const windowDate = hour < 12 ? new Date(today.getTime() - 24 * 60 * 60 * 1000) : today;
-      const darkWindow = getDarkWindow(windowDate);
-
-      // Format time as HH:MM
-      const formatTime = (date) => {
-        return date.toLocaleTimeString(currentLang === 'de' ? 'de-DE' : currentLang === 'es' ? 'es-ES' : 'en-US', {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false
-        });
-      };
-
-      // Update dark window display
-      if (darkWindow && darkWindow.hasDarkness) {
-        darkWindowEl.classList.remove('no-darkness');
-        darkWindowText.textContent = `${formatTime(darkWindow.darkStart)} → ${formatTime(darkWindow.darkEnd)}`;
-      } else if (darkWindow) {
-        // No real darkness (summer at high latitudes)
-        darkWindowEl.classList.add('no-darkness');
-        darkWindowText.textContent = t.noDarkness;
-      } else {
-        // No sun data available, fallback to default times
-        darkWindowEl.classList.remove('no-darkness');
-        darkWindowText.textContent = '21:00 → 05:00';
-      }
-
-      // Calculate three viewing slots within dark window
-      let slots = [];
-
-      if (darkWindow && darkWindow.hasDarkness) {
-        const darkDuration = darkWindow.darkEnd - darkWindow.darkStart;
-        const thirdDuration = darkDuration / 3;
-
-        // Early, middle, late slots
-        slots = [
-          {
-            time: new Date(darkWindow.darkStart.getTime() + thirdDuration * 0.5),
-            label: formatTime(new Date(darkWindow.darkStart.getTime() + thirdDuration * 0.5)),
-            name: t.earlyNight
-          },
-          {
-            time: new Date(darkWindow.darkStart.getTime() + thirdDuration * 1.5),
-            label: formatTime(new Date(darkWindow.darkStart.getTime() + thirdDuration * 1.5)),
-            name: t.midNight
-          },
-          {
-            time: new Date(darkWindow.darkStart.getTime() + thirdDuration * 2.5),
-            label: formatTime(new Date(darkWindow.darkStart.getTime() + thirdDuration * 2.5)),
-            name: t.lateNightLabel
-          }
-        ];
-      } else {
-        // Fallback to fixed times if no sun data
-        let evening = new Date(now);
-        let midnight = new Date(now);
-        let lateNight = new Date(now);
-
-        evening.setHours(22, 0, 0, 0);
-        midnight.setHours(0, 0, 0, 0);
-        lateNight.setHours(3, 0, 0, 0);
-
-        if (hour >= 0 && hour < 6) {
-          // Already past midnight
-        } else {
-          midnight.setDate(midnight.getDate() + 1);
-          lateNight.setDate(lateNight.getDate() + 1);
-        }
-
-        if (evening < now && hour >= 0 && hour < 6) {
-          evening.setDate(evening.getDate() + 1);
-        }
-
-        slots = [
-          { time: evening, label: '22:00', name: t.earlyNight },
-          { time: midnight, label: '00:00', name: t.midNight },
-          { time: lateNight, label: '03:00', name: t.lateNightLabel }
-        ];
-      }
-
-      // Sort by time
-      slots.sort((a, b) => a.time - b.time);
-
-      // Calculate probabilities for each slot
-      let bestSlot = null;
-      let bestProb = -1;
-
-      slots.forEach((slot, i) => {
-        const kp = getKpAt(slot.time);
-        const cloud = getCloudAt(slot.time);
-        const isSlotDark = darkWindow ? darkWindow.hasDarkness : true;
-        const prob = calcProbability(kp, isSlotDark, userLocation?.lat);
-        const status = getStatus(prob);
-        const cloudInfo = getCloudInfo(cloud, true);
-
-        // Update DOM
-        $(`tonight-time-${i + 1}`).textContent = slot.label;
-        $(`tonight-prob-${i + 1}`).textContent = prob + '%';
-        $(`tonight-prob-${i + 1}`).className = 'tonight-prob ' + status;
-        $(`tonight-cloud-${i + 1}`).textContent = cloudInfo.icon;
-
-        // Track best slot (only if it's in the future)
-        if (prob > bestProb && slot.time > now) {
-          bestProb = prob;
-          bestSlot = slot;
-        }
-      });
-
-      // Find peak viewing window and show recommendation
-      const tonightBest = $('tonight-best');
-      const locale = currentLang === 'de' ? 'de-DE' : currentLang === 'es' ? 'es-ES' : 'en-US';
-      const formatTimeShort = (date) => date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: false });
-
-      if (!darkWindow || !darkWindow.hasDarkness) {
-        tonightBest.textContent = t.noDarkness;
-      } else {
-        const peakWindow = findPeakViewingWindow(darkWindow);
-        const kpThreshold = userLocation ? getKpThreshold(userLocation.lat) : 5;
-
-        if (peakWindow && peakWindow.peakKp >= kpThreshold) {
-          // Good conditions - show peak window
-          const g = getGScale(peakWindow.peakKp);
-          tonightBest.innerHTML = `
-            <strong>${t.peakWindow}: ${formatTimeShort(peakWindow.startTime)} – ${formatTimeShort(peakWindow.endTime)}</strong>
-            <br><span style="font-size: 0.8rem; color: #6b7280;">${t.peakKp}: ${peakWindow.peakKp.toFixed(1)} <span class="g-scale ${g.class}" style="font-size: 0.65rem;">${g.label}</span></span>
-          `;
-        } else if (peakWindow && peakWindow.peakKp >= kpThreshold - 1) {
-          // Marginal conditions
-          tonightBest.innerHTML = `${t.bestViewing} <strong>${formatTimeShort(peakWindow.peakTime)}</strong> (Kp ${peakWindow.peakKp.toFixed(1)})`;
-        } else {
-          tonightBest.textContent = t.lowActivity;
-        }
-      }
     }
 
     // Update main status
@@ -2214,7 +1926,6 @@
       }
 
       const status = getStatus(prob);
-      const cloudInfo = getCloudInfo(cloud, isNight);
 
       // Status indicator
       statusIndicator.className = 'status-indicator status-' + status;
@@ -2223,23 +1934,58 @@
         statusEmoji.textContent = '✨';
         statusText.textContent = t.statusGood;
         statusText.className = 'status-text good-text';
-        statusSubtitle.textContent = isNight ? t.subtitleGoodNight : t.subtitleGoodDay;
       } else if (status === 'possible') {
         statusEmoji.textContent = '🌌';
         statusText.textContent = t.statusPossible;
         statusText.className = 'status-text possible-text';
-        statusSubtitle.textContent = isNight ? t.subtitlePossibleNight : t.subtitlePossibleDay;
       } else {
         statusEmoji.textContent = isNight ? '🌙' : '💤';
         statusText.textContent = t.statusUnlikely;
         statusText.className = 'status-text unlikely-text';
-        statusSubtitle.textContent = isNight ? t.subtitleUnlikelyNight : t.subtitleUnlikelyDay;
       }
 
-      // Stats
-      statChance.textContent = prob + '%';
-      statClouds.textContent = cloudInfo.icon;
-      statDirection.textContent = userLocation ? (userLocation.lat >= 0 ? t.north : t.south) : t.north;
+      // G-Scale Badge
+      const gScaleBadge = $('g-scale-badge');
+      if (currentKp !== null) {
+        const g = getGScale(currentKp);
+        gScaleBadge.textContent = g.label;
+        gScaleBadge.className = 'g-scale-badge ' + g.class;
+      }
+
+      // Peak Window
+      const peakWindowEl = $('peak-window');
+      const peakWindowText = $('peak-window-text');
+      const locale = currentLang === 'de' ? 'de-DE' : currentLang === 'es' ? 'es-ES' : 'en-US';
+      const formatTimeShort = (date) => date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: false });
+
+      const today = new Date(now);
+      today.setHours(12, 0, 0, 0);
+      const hour = now.getHours();
+      const windowDate = hour < 12 ? new Date(today.getTime() - 24 * 60 * 60 * 1000) : today;
+      const darkWindow = getDarkWindow(windowDate);
+
+      if (darkWindow && darkWindow.hasDarkness) {
+        const peakWindow = findPeakViewingWindow(darkWindow);
+        const kpThreshold = userLocation ? getKpThreshold(userLocation.lat) : 5;
+
+        if (peakWindow && peakWindow.peakKp >= kpThreshold) {
+          peakWindowEl.classList.remove('no-peak');
+          peakWindowText.innerHTML = `${t.peakWindow}: <span class="peak-time">${formatTimeShort(peakWindow.startTime)} – ${formatTimeShort(peakWindow.endTime)}</span>`;
+        } else {
+          peakWindowEl.classList.add('no-peak');
+          peakWindowText.textContent = t.lowActivity;
+        }
+      } else {
+        peakWindowEl.classList.add('no-peak');
+        peakWindowText.textContent = t.noDarkness || 'No darkness tonight';
+      }
+
+      // Stats Row: Kp, Clouds%, Moon%
+      $('stat-kp').textContent = currentKp !== null ? currentKp.toFixed(1) : '--';
+      $('stat-clouds').textContent = cloud !== null ? cloud + '%' : '--%';
+
+      const moon = getMoonInfo(now);
+      $('stat-moon').textContent = moon.emoji + ' ' + moon.illumination + '%';
     }
 
     // Onboarding
@@ -2343,8 +2089,8 @@
 
     // Location handler
     async function handleLocation() {
-      locationBtn.disabled = true;
-      locationBtnText.textContent = t.locating;
+      locationChip.disabled = true;
+      locationChipText.textContent = t.locating;
 
       try {
         const pos = await new Promise((resolve, reject) => {
@@ -2358,7 +2104,7 @@
         userLocation = { lat: pos.coords.latitude, lon: pos.coords.longitude };
         localStorage.setItem('auroraLocation', JSON.stringify(userLocation));
 
-        locationBtnText.textContent = t.fetchingWeather;
+        locationChipText.textContent = t.fetchingWeather;
 
         // Fetch weather and OVATION data in parallel
         const [weatherData] = await Promise.all([
@@ -2371,27 +2117,26 @@
         const desc = getLocationDescription(userLocation.lat);
         locationStatus.textContent = `${userLocation.lat.toFixed(1)}°${userLocation.lat >= 0 ? 'N' : 'S'} · ${desc}`;
         locationStatus.className = 'location-status has-location';
-        locationBtnText.textContent = t.updateLocation;
+        locationChipText.textContent = t.updateLocation;
 
         onboardingEl.classList.add('hidden');
         updateStatus();
         renderChart();
-        renderTonightForecast();
 
-        // Show notification button after location is set
+        // Show notification chip after location is set
         if (checkNotificationSupport()) {
-          $('notification-section').classList.remove('hidden');
+          $('notification-chip').classList.remove('hidden');
         }
 
       } catch (err) {
-        locationBtnText.textContent = t.locationFailed;
+        locationChipText.textContent = t.locationFailed;
         locationStatus.textContent = t.locationHelp;
         setTimeout(() => {
-          locationBtnText.textContent = t.tryAgain;
+          locationChipText.textContent = t.tryAgain;
         }, 2000);
       }
 
-      locationBtn.disabled = false;
+      locationChip.disabled = false;
     }
 
     // Initialize UI with translations
@@ -2411,27 +2156,14 @@
       // Onboarding
       $('onboarding-text').textContent = t.onboarding;
 
-      // Status card
-      $('status-time-label').textContent = t.rightNow;
-      $('stat-now-label').textContent = t.nowLabel;
-      $('stat-sky-label').textContent = t.skyLabel;
-      $('stat-look-label').textContent = t.lookLabel;
-
-      // Tonight section
-      $('tonight-header').textContent = t.tonightForecast;
-
       // Chart section
       $('chart-title').textContent = t.timeline;
-      $('legend-good').textContent = t.goodChance;
-      $('legend-possible').textContent = t.possible;
-      $('legend-unlikely').textContent = t.unlikely;
-      $('tap-hint-text').textContent = t.tapHint;
 
-      // Location button
-      locationBtnText.textContent = t.enableLocation;
+      // Location chip
+      locationChipText.textContent = t.enableLocation;
 
-      // Notification button
-      $('notification-btn-text').textContent = t.enableAlerts;
+      // Notification chip
+      $('notification-chip-text').textContent = t.enableAlerts;
 
       // Tooltip labels
       $('tooltip-aurora-label').textContent = t.tooltipAurora;
@@ -2479,7 +2211,7 @@
             const desc = getLocationDescription(userLocation.lat);
             locationStatus.textContent = `${userLocation.lat.toFixed(1)}°${userLocation.lat >= 0 ? 'N' : 'S'} · ${desc}`;
             locationStatus.className = 'location-status has-location';
-            locationBtnText.textContent = t.updateLocation;
+            locationChipText.textContent = t.updateLocation;
           } catch (e) {
             console.error('Weather fetch failed:', e);
           }
@@ -2490,7 +2222,6 @@
 
         updateStatus();
         renderChart();
-        renderTonightForecast();
         checkOnboarding();
         checkTapHint();
 
@@ -2520,12 +2251,10 @@
     }
 
     async function requestNotificationPermission() {
-      const notificationBtn = $('notification-btn');
-      const notificationBtnText = $('notification-btn-text');
-      const notificationStatus = $('notification-status');
+      const notificationChip = $('notification-chip');
+      const notificationChipText = $('notification-chip-text');
 
       if (!checkNotificationSupport()) {
-        notificationStatus.textContent = t.alertsNotSupported;
         return false;
       }
 
@@ -2535,11 +2264,8 @@
         if (permission === 'granted') {
           notificationsEnabled = true;
           localStorage.setItem('notificationsEnabled', 'true');
-          notificationBtnText.textContent = t.alertsEnabled;
-          notificationBtn.style.background = 'linear-gradient(135deg, #166534 0%, #22c55e 100%)';
-          notificationBtn.style.boxShadow = '0 4px 20px #16653444';
-          notificationStatus.textContent = '';
-          notificationStatus.className = 'location-status has-location';
+          notificationChipText.textContent = t.alertsOn;
+          notificationChip.classList.add('active');
 
           // Initialize lastNotifiedKp with current value
           if (currentKp !== null) {
@@ -2549,7 +2275,6 @@
 
           return true;
         } else {
-          notificationStatus.textContent = t.alertsDenied;
           return false;
         }
       } catch (e) {
@@ -2604,32 +2329,30 @@
     }
 
     function initNotifications() {
-      const notificationSection = $('notification-section');
-      const notificationBtn = $('notification-btn');
-      const notificationBtnText = $('notification-btn-text');
+      const notificationChip = $('notification-chip');
+      const notificationChipText = $('notification-chip-text');
 
       // Only show if location is set (notifications are more useful with location)
       if (userLocation && checkNotificationSupport()) {
-        notificationSection.classList.remove('hidden');
+        notificationChip.classList.remove('hidden');
       }
 
       // Check if already enabled
       if (localStorage.getItem('notificationsEnabled') === 'true' && Notification.permission === 'granted') {
         notificationsEnabled = true;
-        notificationBtnText.textContent = t.alertsEnabled;
-        notificationBtn.style.background = 'linear-gradient(135deg, #166534 0%, #22c55e 100%)';
-        notificationBtn.style.boxShadow = '0 4px 20px #16653444';
+        notificationChipText.textContent = t.alertsOn;
+        notificationChip.classList.add('active');
 
         // Restore last notified Kp
         const storedKp = localStorage.getItem('lastNotifiedKp');
         if (storedKp) lastNotifiedKp = parseFloat(storedKp);
       }
 
-      notificationBtn.addEventListener('click', requestNotificationPermission);
+      notificationChip.addEventListener('click', requestNotificationPermission);
     }
 
     // Events
-    locationBtn.addEventListener('click', handleLocation);
+    locationChip.addEventListener('click', handleLocation);
     document.addEventListener('click', hideTooltip);
 
     // Scroll indicator events
