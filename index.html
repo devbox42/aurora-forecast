@@ -964,6 +964,10 @@
               <span class="details-value" id="detail-kp">--<span class="g-scale g0">G0</span></span>
             </div>
             <div class="details-row">
+              <span class="details-label" id="detail-ovation-label">OVATION Model</span>
+              <span class="details-value" id="detail-ovation">--%</span>
+            </div>
+            <div class="details-row">
               <span class="details-label">Bz Component</span>
               <span class="details-value" id="detail-bz">-- nT</span>
             </div>
@@ -1083,6 +1087,18 @@
         </button>
         <div id="location-status" class="location-status"></div>
       </div>
+
+      <!-- Notification Button -->
+      <div id="notification-section" class="location-section hidden" style="margin-top: 12px;">
+        <button id="notification-btn" class="location-btn" style="background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); box-shadow: 0 4px 20px #7c3aed44;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width: 20px; height: 20px;">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          <span id="notification-btn-text">Enable Alerts</span>
+        </button>
+        <div id="notification-status" class="location-status"></div>
+      </div>
     </main>
 
     <footer>
@@ -1181,7 +1197,18 @@
         astroDusk: 'Astro Twilight',
         astroDawn: 'Astro Dawn',
         latitude: 'Latitude',
-        kpThreshold: 'Kp Threshold'
+        kpThreshold: 'Kp Threshold',
+        ovationModel: 'OVATION Model',
+        noLocation: 'No location',
+        peakWindow: 'Peak window',
+        peakKp: 'Peak Kp',
+        // Notifications
+        enableAlerts: 'Enable Alerts',
+        alertsEnabled: 'Alerts enabled',
+        alertsDenied: 'Notifications blocked',
+        alertsNotSupported: 'Notifications not supported',
+        kpSpikeTitle: 'Aurora Alert!',
+        kpSpikeBody: 'Kp index jumped to {kp} ({g}) - check for aurora!'
       },
       de: {
         title: 'POLARLICHT-VORHERSAGE',
@@ -1264,7 +1291,18 @@
         astroDusk: 'Astro Dämmerung',
         astroDawn: 'Astro Morgen',
         latitude: 'Breitengrad',
-        kpThreshold: 'Kp Schwelle'
+        kpThreshold: 'Kp Schwelle',
+        ovationModel: 'OVATION Modell',
+        noLocation: 'Kein Standort',
+        peakWindow: 'Beste Zeit',
+        peakKp: 'Peak Kp',
+        // Notifications
+        enableAlerts: 'Benachrichtigungen',
+        alertsEnabled: 'Aktiv',
+        alertsDenied: 'Benachrichtigungen blockiert',
+        alertsNotSupported: 'Nicht unterstützt',
+        kpSpikeTitle: 'Polarlicht-Alarm!',
+        kpSpikeBody: 'Kp-Index auf {kp} ({g}) gestiegen - schau nach Polarlichtern!'
       },
       es: {
         title: 'PRONÓSTICO AURORA',
@@ -1347,7 +1385,18 @@
         astroDusk: 'Crepúsculo Astro',
         astroDawn: 'Alba Astro',
         latitude: 'Latitud',
-        kpThreshold: 'Umbral Kp'
+        kpThreshold: 'Umbral Kp',
+        ovationModel: 'Modelo OVATION',
+        noLocation: 'Sin ubicación',
+        peakWindow: 'Mejor hora',
+        peakKp: 'Kp máximo',
+        // Notifications
+        enableAlerts: 'Activar alertas',
+        alertsEnabled: 'Alertas activas',
+        alertsDenied: 'Notificaciones bloqueadas',
+        alertsNotSupported: 'No soportado',
+        kpSpikeTitle: '¡Alerta de aurora!',
+        kpSpikeBody: 'Índice Kp subió a {kp} ({g}) - ¡busca auroras!'
       }
     };
 
@@ -1370,6 +1419,10 @@
     let lastUpdateTime = null;
     let pullStartY = 0;
     let isPulling = false;
+    let ovationData = null;
+    let ovationForecastTime = null;
+    let lastNotifiedKp = null;
+    let notificationsEnabled = false;
 
     // DOM
     const $ = id => document.getElementById(id);
@@ -1445,11 +1498,117 @@
       return { icon: '☁️', text: 'Overcast' };
     }
 
+    // Fetch OVATION aurora model data from NOAA
+    async function fetchOvationData() {
+      try {
+        const res = await fetch('https://services.swpc.noaa.gov/json/ovation_aurora_latest.json');
+        const data = await res.json();
+        ovationData = data.coordinates;
+        ovationForecastTime = new Date(data['Forecast Time']);
+        return true;
+      } catch (e) {
+        console.error('OVATION fetch failed:', e);
+        return false;
+      }
+    }
+
+    // Get aurora probability from OVATION model for a location
+    function getOvationProbability(lat, lon) {
+      if (!ovationData || !userLocation) return null;
+
+      // Convert longitude to 0-360 range (OVATION uses 0-360)
+      let oLon = lon;
+      if (oLon < 0) oLon += 360;
+
+      // Round to nearest integer for grid lookup
+      const targetLon = Math.round(oLon);
+      const targetLat = Math.round(lat);
+
+      // Find matching coordinate
+      for (const coord of ovationData) {
+        if (coord[0] === targetLon && coord[1] === targetLat) {
+          return coord[2];
+        }
+      }
+
+      // Fallback: find nearest
+      let nearest = null;
+      let minDist = Infinity;
+      for (const coord of ovationData) {
+        const dist = Math.abs(coord[0] - targetLon) + Math.abs(coord[1] - targetLat);
+        if (dist < minDist) {
+          minDist = dist;
+          nearest = coord;
+        }
+      }
+      return nearest ? nearest[2] : null;
+    }
+
     // Status category
     function getStatus(prob) {
       if (prob >= 50) return 'good';
       if (prob >= 25) return 'possible';
       return 'unlikely';
+    }
+
+    // Find peak viewing window during dark hours
+    function findPeakViewingWindow(darkWindow) {
+      if (!darkWindow || !darkWindow.hasDarkness) return null;
+
+      const now = new Date();
+      let peakKp = -1;
+      let peakTime = null;
+      let peakStartTime = null;
+      let peakEndTime = null;
+
+      // Scan through dark hours in 1-hour increments
+      let scanTime = new Date(Math.max(darkWindow.darkStart.getTime(), now.getTime()));
+
+      // Round up to next hour
+      scanTime.setMinutes(0, 0, 0);
+      if (scanTime < now) scanTime.setHours(scanTime.getHours() + 1);
+
+      const kpValues = [];
+
+      while (scanTime <= darkWindow.darkEnd) {
+        const kp = getKpAt(scanTime);
+        if (kp !== null) {
+          kpValues.push({ time: new Date(scanTime), kp });
+          if (kp > peakKp) {
+            peakKp = kp;
+            peakTime = new Date(scanTime);
+          }
+        }
+        scanTime.setHours(scanTime.getHours() + 1);
+      }
+
+      if (peakKp < 0 || !peakTime) return null;
+
+      // Find window where Kp is within 1 of peak (good viewing range)
+      const threshold = Math.max(0, peakKp - 1);
+      peakStartTime = peakTime;
+      peakEndTime = peakTime;
+
+      for (const v of kpValues) {
+        if (v.kp >= threshold) {
+          if (v.time < peakStartTime) peakStartTime = v.time;
+          if (v.time > peakEndTime) peakEndTime = v.time;
+        }
+      }
+
+      // Add buffer for the end time (since Kp is measured in 3h blocks)
+      peakEndTime = new Date(peakEndTime.getTime() + 2 * 60 * 60 * 1000);
+      if (peakEndTime > darkWindow.darkEnd) {
+        peakEndTime = darkWindow.darkEnd;
+      }
+
+      return {
+        peakKp,
+        peakTime,
+        startTime: peakStartTime,
+        endTime: peakEndTime,
+        durationHours: Math.round((peakEndTime - peakStartTime) / (60 * 60 * 1000))
+      };
     }
 
     // Format day (handles both past and future dates)
@@ -1668,6 +1827,23 @@
       if (currentKp !== null) {
         const g = getGScale(currentKp);
         $('detail-kp').innerHTML = `${currentKp.toFixed(2)} <span class="g-scale ${g.class}">${g.label}</span>`;
+      }
+
+      // OVATION model probability
+      const ovationEl = $('detail-ovation');
+      if (ovationData && userLocation) {
+        const ovationProb = getOvationProbability(userLocation.lat, userLocation.lon);
+        if (ovationProb !== null) {
+          const ovationClass = ovationProb >= 50 ? 'good' : ovationProb >= 20 ? 'warning' : '';
+          ovationEl.textContent = `${ovationProb}%`;
+          ovationEl.className = 'details-value ' + ovationClass;
+        } else {
+          ovationEl.textContent = '--';
+          ovationEl.className = 'details-value';
+        }
+      } else {
+        ovationEl.textContent = t.noLocation;
+        ovationEl.className = 'details-value';
       }
 
       // Solar wind data
@@ -1988,14 +2164,30 @@
         }
       });
 
-      // Show best time recommendation
+      // Find peak viewing window and show recommendation
       const tonightBest = $('tonight-best');
+      const locale = currentLang === 'de' ? 'de-DE' : currentLang === 'es' ? 'es-ES' : 'en-US';
+      const formatTimeShort = (date) => date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: false });
+
       if (!darkWindow || !darkWindow.hasDarkness) {
         tonightBest.textContent = t.noDarkness;
-      } else if (bestProb >= 25 && bestSlot) {
-        tonightBest.innerHTML = `${t.bestViewing} <strong>${bestSlot.label}</strong> (${bestProb}%)`;
       } else {
-        tonightBest.textContent = t.lowActivity;
+        const peakWindow = findPeakViewingWindow(darkWindow);
+        const kpThreshold = userLocation ? getKpThreshold(userLocation.lat) : 5;
+
+        if (peakWindow && peakWindow.peakKp >= kpThreshold) {
+          // Good conditions - show peak window
+          const g = getGScale(peakWindow.peakKp);
+          tonightBest.innerHTML = `
+            <strong>${t.peakWindow}: ${formatTimeShort(peakWindow.startTime)} – ${formatTimeShort(peakWindow.endTime)}</strong>
+            <br><span style="font-size: 0.8rem; color: #6b7280;">${t.peakKp}: ${peakWindow.peakKp.toFixed(1)} <span class="g-scale ${g.class}" style="font-size: 0.65rem;">${g.label}</span></span>
+          `;
+        } else if (peakWindow && peakWindow.peakKp >= kpThreshold - 1) {
+          // Marginal conditions
+          tonightBest.innerHTML = `${t.bestViewing} <strong>${formatTimeShort(peakWindow.peakTime)}</strong> (Kp ${peakWindow.peakKp.toFixed(1)})`;
+        } else {
+          tonightBest.textContent = t.lowActivity;
+        }
       }
     }
 
@@ -2004,7 +2196,23 @@
       const now = new Date();
       const isNight = isDarkAt(now);
       const cloud = getCloudAt(now);
-      const prob = calcProbability(currentKp, isNight, userLocation?.lat);
+
+      // Use OVATION model if available for current probability (more accurate)
+      let prob;
+      let usingOvation = false;
+      if (ovationData && userLocation && isNight) {
+        const ovationProb = getOvationProbability(userLocation.lat, userLocation.lon);
+        if (ovationProb !== null) {
+          prob = ovationProb;
+          usingOvation = true;
+        }
+      }
+
+      // Fallback to Kp-based calculation
+      if (!usingOvation) {
+        prob = calcProbability(currentKp, isNight, userLocation?.lat);
+      }
+
       const status = getStatus(prob);
       const cloudInfo = getCloudInfo(cloud, isNight);
 
@@ -2151,7 +2359,12 @@
         localStorage.setItem('auroraLocation', JSON.stringify(userLocation));
 
         locationBtnText.textContent = t.fetchingWeather;
-        const weatherData = await fetchWeatherData(userLocation.lat, userLocation.lon);
+
+        // Fetch weather and OVATION data in parallel
+        const [weatherData] = await Promise.all([
+          fetchWeatherData(userLocation.lat, userLocation.lon),
+          fetchOvationData()
+        ]);
         cloudCover = weatherData.hourly;
         window.sunTimes = weatherData.daily;
 
@@ -2164,6 +2377,11 @@
         updateStatus();
         renderChart();
         renderTonightForecast();
+
+        // Show notification button after location is set
+        if (checkNotificationSupport()) {
+          $('notification-section').classList.remove('hidden');
+        }
 
       } catch (err) {
         locationBtnText.textContent = t.locationFailed;
@@ -2212,6 +2430,9 @@
       // Location button
       locationBtnText.textContent = t.enableLocation;
 
+      // Notification button
+      $('notification-btn-text').textContent = t.enableAlerts;
+
       // Tooltip labels
       $('tooltip-aurora-label').textContent = t.tooltipAurora;
       $('tooltip-sky-label').textContent = t.tooltipSky;
@@ -2223,6 +2444,7 @@
       $('details-weather-title').textContent = t.detailsWeather;
       $('details-sun-title').textContent = t.detailsSunTimes;
       $('details-location-title').textContent = t.detailsLocation;
+      $('detail-ovation-label').textContent = t.ovationModel;
       $('detail-clouds-label').textContent = t.cloudCover;
       $('detail-moon-label').textContent = t.moonPhase;
       $('detail-sunset-label').textContent = t.sunset;
@@ -2247,7 +2469,11 @@
 
         if (userLocation) {
           try {
-            const weatherData = await fetchWeatherData(userLocation.lat, userLocation.lon);
+            // Fetch weather and OVATION in parallel for better performance
+            const [weatherData] = await Promise.all([
+              fetchWeatherData(userLocation.lat, userLocation.lon),
+              fetchOvationData()
+            ]);
             cloudCover = weatherData.hourly;
             window.sunTimes = weatherData.daily;
             const desc = getLocationDescription(userLocation.lat);
@@ -2288,6 +2514,120 @@
       }
     }
 
+    // Notification functions
+    function checkNotificationSupport() {
+      return 'Notification' in window && 'serviceWorker' in navigator;
+    }
+
+    async function requestNotificationPermission() {
+      const notificationBtn = $('notification-btn');
+      const notificationBtnText = $('notification-btn-text');
+      const notificationStatus = $('notification-status');
+
+      if (!checkNotificationSupport()) {
+        notificationStatus.textContent = t.alertsNotSupported;
+        return false;
+      }
+
+      try {
+        const permission = await Notification.requestPermission();
+
+        if (permission === 'granted') {
+          notificationsEnabled = true;
+          localStorage.setItem('notificationsEnabled', 'true');
+          notificationBtnText.textContent = t.alertsEnabled;
+          notificationBtn.style.background = 'linear-gradient(135deg, #166534 0%, #22c55e 100%)';
+          notificationBtn.style.boxShadow = '0 4px 20px #16653444';
+          notificationStatus.textContent = '';
+          notificationStatus.className = 'location-status has-location';
+
+          // Initialize lastNotifiedKp with current value
+          if (currentKp !== null) {
+            lastNotifiedKp = currentKp;
+            localStorage.setItem('lastNotifiedKp', currentKp.toString());
+          }
+
+          return true;
+        } else {
+          notificationStatus.textContent = t.alertsDenied;
+          return false;
+        }
+      } catch (e) {
+        console.error('Notification permission error:', e);
+        return false;
+      }
+    }
+
+    function checkForKpSpike() {
+      if (!notificationsEnabled || currentKp === null) return;
+
+      // Get last notified Kp from storage or state
+      const storedKp = localStorage.getItem('lastNotifiedKp');
+      if (storedKp) lastNotifiedKp = parseFloat(storedKp);
+
+      // Get user's Kp threshold
+      const threshold = userLocation ? getKpThreshold(userLocation.lat) : 5;
+
+      // Check for significant increase (spike detection)
+      // Trigger if: Kp increased by 2+ OR crossed the threshold
+      const kpIncrease = lastNotifiedKp !== null ? currentKp - lastNotifiedKp : 0;
+      const crossedThreshold = lastNotifiedKp !== null && lastNotifiedKp < threshold && currentKp >= threshold;
+
+      if (kpIncrease >= 2 || crossedThreshold) {
+        sendKpNotification(currentKp);
+      }
+
+      // Update last known Kp
+      lastNotifiedKp = currentKp;
+      localStorage.setItem('lastNotifiedKp', currentKp.toString());
+    }
+
+    function sendKpNotification(kp) {
+      if (!notificationsEnabled || Notification.permission !== 'granted') return;
+
+      const g = getGScale(kp);
+      const body = t.kpSpikeBody.replace('{kp}', kp.toFixed(1)).replace('{g}', g.label);
+
+      const notification = new Notification(t.kpSpikeTitle, {
+        body: body,
+        icon: 'icon-192.png',
+        badge: 'icon-192.png',
+        tag: 'kp-spike',
+        renotify: true,
+        requireInteraction: true
+      });
+
+      notification.onclick = function() {
+        window.focus();
+        notification.close();
+      };
+    }
+
+    function initNotifications() {
+      const notificationSection = $('notification-section');
+      const notificationBtn = $('notification-btn');
+      const notificationBtnText = $('notification-btn-text');
+
+      // Only show if location is set (notifications are more useful with location)
+      if (userLocation && checkNotificationSupport()) {
+        notificationSection.classList.remove('hidden');
+      }
+
+      // Check if already enabled
+      if (localStorage.getItem('notificationsEnabled') === 'true' && Notification.permission === 'granted') {
+        notificationsEnabled = true;
+        notificationBtnText.textContent = t.alertsEnabled;
+        notificationBtn.style.background = 'linear-gradient(135deg, #166534 0%, #22c55e 100%)';
+        notificationBtn.style.boxShadow = '0 4px 20px #16653444';
+
+        // Restore last notified Kp
+        const storedKp = localStorage.getItem('lastNotifiedKp');
+        if (storedKp) lastNotifiedKp = parseFloat(storedKp);
+      }
+
+      notificationBtn.addEventListener('click', requestNotificationPermission);
+    }
+
     // Events
     locationBtn.addEventListener('click', handleLocation);
     document.addEventListener('click', hideTooltip);
@@ -2311,10 +2651,17 @@
 
     // Start
     initUI();
-    init();
+    init().then(() => {
+      initNotifications();
+      checkForKpSpike();
+    });
 
-    // Refresh data every 15 minutes
-    setInterval(init, 15 * 60 * 1000);
+    // Refresh data every 15 minutes and check for spikes
+    setInterval(() => {
+      init().then(() => {
+        checkForKpSpike();
+      });
+    }, 15 * 60 * 1000);
 
     // Update timestamp every minute
     setInterval(updateTimestamp, 60 * 1000);
