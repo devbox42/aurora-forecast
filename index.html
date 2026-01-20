@@ -1209,8 +1209,8 @@
     function getCloudAt(time) {
       if (!cloudCover) return null;
       for (let i = 0; i < cloudCover.time.length; i++) {
-        const t = new Date(cloudCover.time[i]);
-        if (Math.abs(t - time) < 1.5 * 60 * 60 * 1000) {
+        const cloudTime = new Date(cloudCover.time[i]);
+        if (Math.abs(cloudTime - time) < 1.5 * 60 * 60 * 1000) {
           return cloudCover.cloud_cover[i];
         }
       }
@@ -1277,26 +1277,26 @@
       currentBlock.setUTCHours(utcAlignedHour, 0, 0, 0);
 
       // Start 7 days (56 slots × 3h = 168h) before current block
-      let t = new Date(currentBlock.getTime() - 56 * 3 * 60 * 60 * 1000);
+      let slotTime = new Date(currentBlock.getTime() - 56 * 3 * 60 * 60 * 1000);
 
       // 80 slots total: 56 historical + 24 forecast = 240 hours (10 days)
       let nowSlotIndex = -1;
       for (let i = 0; i < 80; i++) {
-        const localHour = t.getHours();
+        const localHour = slotTime.getHours();
         const isNight = localHour >= 20 || localHour < 6;
-        const kp = getKpAt(t);
-        const isPast = t < currentBlock;
+        const kp = getKpAt(slotTime);
+        const isPast = slotTime < currentBlock;
         // No cloud data for historical (Open-Meteo doesn't provide it)
-        const cloud = isPast ? null : getCloudAt(t);
+        const cloud = isPast ? null : getCloudAt(slotTime);
         const prob = calcProbability(kp, isNight, userLocation?.lat);
 
         // Track which slot is "now"
-        if (t.getTime() === currentBlock.getTime()) {
+        if (slotTime.getTime() === currentBlock.getTime()) {
           nowSlotIndex = i;
         }
 
-        slots.push({ time: new Date(t), hour: localHour, isNight, kp, cloud, prob, isPast });
-        t = new Date(t.getTime() + 3 * 60 * 60 * 1000);
+        slots.push({ time: new Date(slotTime), hour: localHour, isNight, kp, cloud, prob, isPast });
+        slotTime = new Date(slotTime.getTime() + 3 * 60 * 60 * 1000);
       }
 
       let lastDay = null;
