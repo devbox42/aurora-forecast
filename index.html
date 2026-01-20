@@ -1011,6 +1011,9 @@
         statusGood: 'GOOD CHANCE',
         statusPossible: 'POSSIBLE',
         statusUnlikely: 'UNLIKELY',
+        statusTonightGood: 'TONIGHT: GOOD',
+        statusTonightPossible: 'TONIGHT: POSSIBLE',
+        waitForDark: 'Wait for darkness',
         subtitleGoodNight: 'Head outside and look north!',
         subtitleGoodDay: 'Get ready for tonight!',
         subtitlePossibleNight: 'Worth checking the sky',
@@ -1106,6 +1109,9 @@
         statusGood: 'GUTE CHANCE',
         statusPossible: 'MÖGLICH',
         statusUnlikely: 'UNWAHRSCHEINLICH',
+        statusTonightGood: 'HEUTE NACHT: GUT',
+        statusTonightPossible: 'HEUTE NACHT: MÖGLICH',
+        waitForDark: 'Warte auf Dunkelheit',
         subtitleGoodNight: 'Raus gehen und nach Norden schauen!',
         subtitleGoodDay: 'Mach dich bereit für heute Nacht!',
         subtitlePossibleNight: 'Ein Blick lohnt sich',
@@ -1201,6 +1207,9 @@
         statusGood: 'BUENA CHANCE',
         statusPossible: 'POSIBLE',
         statusUnlikely: 'IMPROBABLE',
+        statusTonightGood: 'ESTA NOCHE: BUENA',
+        statusTonightPossible: 'ESTA NOCHE: POSIBLE',
+        waitForDark: 'Espera la oscuridad',
         subtitleGoodNight: '¡Sal y mira al norte!',
         subtitleGoodDay: '¡Prepárate para esta noche!',
         subtitlePossibleNight: 'Vale la pena mirar el cielo',
@@ -1909,7 +1918,32 @@
       const isNight = isDarkAt(now);
       const cloud = getCloudAt(now);
 
-      // Use OVATION model if available for current probability (more accurate)
+      // Get tonight's dark window for smart status switching
+      const today = new Date(now);
+      today.setHours(12, 0, 0, 0);
+      const hour = now.getHours();
+      const windowDate = hour < 12 ? new Date(today.getTime() - 24 * 60 * 60 * 1000) : today;
+      const darkWindow = getDarkWindow(windowDate);
+
+      // Determine if we should show tonight's forecast vs current
+      let showTonightForecast = false;
+      let tonightPeakProb = 0;
+      let tonightPeakTime = null;
+
+      if (darkWindow && darkWindow.hasDarkness && !isNight) {
+        // We're before darkness - check tonight's peak
+        const peakWindow = findPeakViewingWindow(darkWindow);
+        if (peakWindow) {
+          tonightPeakProb = calcProbability(peakWindow.peakKp, true, userLocation?.lat);
+          tonightPeakTime = peakWindow.peakTime;
+          // Show tonight's forecast if it's better than "unlikely"
+          if (tonightPeakProb >= 30) {
+            showTonightForecast = true;
+          }
+        }
+      }
+
+      // Calculate current probability
       let prob;
       let usingOvation = false;
       if (ovationData && userLocation && isNight) {
@@ -1925,23 +1959,39 @@
         prob = calcProbability(currentKp, isNight, userLocation?.lat);
       }
 
-      const status = getStatus(prob);
+      // Use tonight's forecast if showing that mode
+      const displayProb = showTonightForecast ? tonightPeakProb : prob;
+      const status = getStatus(displayProb);
 
       // Status indicator
       statusIndicator.className = 'status-indicator status-' + status;
 
-      if (status === 'good') {
-        statusEmoji.textContent = '✨';
-        statusText.textContent = t.statusGood;
-        statusText.className = 'status-text good-text';
-      } else if (status === 'possible') {
-        statusEmoji.textContent = '🌌';
-        statusText.textContent = t.statusPossible;
-        statusText.className = 'status-text possible-text';
+      if (showTonightForecast) {
+        // Show tonight's forecast
+        if (status === 'good') {
+          statusEmoji.textContent = '✨';
+          statusText.textContent = t.statusTonightGood;
+          statusText.className = 'status-text good-text';
+        } else {
+          statusEmoji.textContent = '🌌';
+          statusText.textContent = t.statusTonightPossible;
+          statusText.className = 'status-text possible-text';
+        }
       } else {
-        statusEmoji.textContent = isNight ? '🌙' : '💤';
-        statusText.textContent = t.statusUnlikely;
-        statusText.className = 'status-text unlikely-text';
+        // Show current conditions
+        if (status === 'good') {
+          statusEmoji.textContent = '✨';
+          statusText.textContent = t.statusGood;
+          statusText.className = 'status-text good-text';
+        } else if (status === 'possible') {
+          statusEmoji.textContent = '🌌';
+          statusText.textContent = t.statusPossible;
+          statusText.className = 'status-text possible-text';
+        } else {
+          statusEmoji.textContent = isNight ? '🌙' : '☀️';
+          statusText.textContent = t.statusUnlikely;
+          statusText.className = 'status-text unlikely-text';
+        }
       }
 
       // G-Scale Badge
@@ -1952,25 +2002,19 @@
         gScaleBadge.className = 'g-scale-badge ' + g.class;
       }
 
-      // Peak Window
+      // Peak Window display
       const peakWindowEl = $('peak-window');
       const peakWindowText = $('peak-window-text');
       const locale = currentLang === 'de' ? 'de-DE' : currentLang === 'es' ? 'es-ES' : 'en-US';
       const formatTimeShort = (date) => date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: false });
 
-      const today = new Date(now);
-      today.setHours(12, 0, 0, 0);
-      const hour = now.getHours();
-      const windowDate = hour < 12 ? new Date(today.getTime() - 24 * 60 * 60 * 1000) : today;
-      const darkWindow = getDarkWindow(windowDate);
-
       if (darkWindow && darkWindow.hasDarkness) {
-        const peakWindow = findPeakViewingWindow(darkWindow);
+        const peakData = findPeakViewingWindow(darkWindow);
         const kpThreshold = userLocation ? getKpThreshold(userLocation.lat) : 5;
 
-        if (peakWindow && peakWindow.peakKp >= kpThreshold) {
+        if (peakData && peakData.peakKp >= kpThreshold) {
           peakWindowEl.classList.remove('no-peak');
-          peakWindowText.innerHTML = `${t.peakWindow}: <span class="peak-time">${formatTimeShort(peakWindow.startTime)} – ${formatTimeShort(peakWindow.endTime)}</span>`;
+          peakWindowText.innerHTML = `${t.peakWindow}: <span class="peak-time">${formatTimeShort(peakData.startTime)} – ${formatTimeShort(peakData.endTime)}</span>`;
         } else {
           peakWindowEl.classList.add('no-peak');
           peakWindowText.textContent = t.lowActivity;
@@ -2373,7 +2417,7 @@
         registrations.forEach(r => r.unregister());
       });
       setTimeout(() => {
-        navigator.serviceWorker.register('sw.js?v=24').catch(() => {});
+        navigator.serviceWorker.register('sw.js?v=25').catch(() => {});
       }, 100);
     }
 
