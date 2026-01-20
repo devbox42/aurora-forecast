@@ -754,6 +754,122 @@
       border-radius: 12px;
     }
 
+    /* Nerd Details Panel */
+    .details-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px;
+      margin: 16px 0;
+      background: #111118;
+      border: 1px solid #252540;
+      border-radius: 12px;
+      color: #6b7280;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .details-toggle:hover {
+      background: #1a1a2a;
+      color: #9ca3af;
+    }
+
+    .details-toggle .arrow {
+      transition: transform 0.3s ease;
+      font-size: 0.7rem;
+    }
+
+    .details-toggle.open .arrow {
+      transform: rotate(180deg);
+    }
+
+    .details-panel {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, opacity 0.3s ease;
+      opacity: 0;
+    }
+
+    .details-panel.open {
+      max-height: 600px;
+      opacity: 1;
+    }
+
+    .details-content {
+      background: linear-gradient(145deg, #0d0d14 0%, #12121a 100%);
+      border: 1px solid #252540;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .details-section {
+      margin-bottom: 16px;
+    }
+
+    .details-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .details-section-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #4b5563;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #1f1f2e;
+    }
+
+    .details-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+    }
+
+    .details-label {
+      color: #6b7280;
+      font-size: 0.85rem;
+    }
+
+    .details-value {
+      color: #e5e5e5;
+      font-size: 0.9rem;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .details-value.good {
+      color: #4ade80;
+    }
+
+    .details-value.warning {
+      color: #facc15;
+    }
+
+    .details-value.bad {
+      color: #f87171;
+    }
+
+    .g-scale {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: 6px;
+    }
+
+    .g-scale.g0 { background: #1f2937; color: #9ca3af; }
+    .g-scale.g1 { background: #166534; color: #86efac; }
+    .g-scale.g2 { background: #854d0e; color: #fde047; }
+    .g-scale.g3 { background: #9a3412; color: #fdba74; }
+    .g-scale.g4 { background: #991b1b; color: #fca5a5; }
+    .g-scale.g5 { background: #7f1d1d; color: #fecaca; }
+
     /* Scroll hint arrow */
     .scroll-hint {
       position: absolute;
@@ -827,6 +943,85 @@
           <div class="stat-item">
             <div id="stat-direction" class="stat-value">N</div>
             <div id="stat-look-label" class="stat-label">Look</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Nerd Details Toggle -->
+      <div id="details-toggle" class="details-toggle" onclick="toggleDetails()">
+        <span id="details-toggle-text">Details</span>
+        <span class="arrow">▼</span>
+      </div>
+
+      <!-- Nerd Details Panel -->
+      <div id="details-panel" class="details-panel">
+        <div class="details-content">
+          <!-- Space Weather Section -->
+          <div class="details-section">
+            <div id="details-space-title" class="details-section-title">Space Weather</div>
+            <div class="details-row">
+              <span class="details-label">Kp Index</span>
+              <span class="details-value" id="detail-kp">--<span class="g-scale g0">G0</span></span>
+            </div>
+            <div class="details-row">
+              <span class="details-label">Bz Component</span>
+              <span class="details-value" id="detail-bz">-- nT</span>
+            </div>
+            <div class="details-row">
+              <span class="details-label">Solar Wind</span>
+              <span class="details-value" id="detail-wind">-- km/s</span>
+            </div>
+            <div class="details-row">
+              <span class="details-label">Bt Total</span>
+              <span class="details-value" id="detail-bt">-- nT</span>
+            </div>
+          </div>
+
+          <!-- Weather Section -->
+          <div class="details-section">
+            <div id="details-weather-title" class="details-section-title">Weather</div>
+            <div class="details-row">
+              <span class="details-label" id="detail-clouds-label">Cloud Cover</span>
+              <span class="details-value" id="detail-clouds">--%</span>
+            </div>
+            <div class="details-row">
+              <span class="details-label" id="detail-moon-label">Moon Phase</span>
+              <span class="details-value" id="detail-moon">--</span>
+            </div>
+          </div>
+
+          <!-- Sun Times Section -->
+          <div class="details-section">
+            <div id="details-sun-title" class="details-section-title">Sun Times</div>
+            <div class="details-row">
+              <span class="details-label" id="detail-sunset-label">Sunset</span>
+              <span class="details-value" id="detail-sunset">--:--</span>
+            </div>
+            <div class="details-row">
+              <span class="details-label" id="detail-dusk-label">Astro Twilight</span>
+              <span class="details-value" id="detail-dusk">--:--</span>
+            </div>
+            <div class="details-row">
+              <span class="details-label" id="detail-dawn-label">Astro Dawn</span>
+              <span class="details-value" id="detail-dawn">--:--</span>
+            </div>
+            <div class="details-row">
+              <span class="details-label" id="detail-sunrise-label">Sunrise</span>
+              <span class="details-value" id="detail-sunrise">--:--</span>
+            </div>
+          </div>
+
+          <!-- Location Section -->
+          <div class="details-section">
+            <div id="details-location-title" class="details-section-title">Location</div>
+            <div class="details-row">
+              <span class="details-label" id="detail-lat-label">Latitude</span>
+              <span class="details-value" id="detail-lat">--°</span>
+            </div>
+            <div class="details-row">
+              <span class="details-label" id="detail-threshold-label">Kp Threshold</span>
+              <span class="details-value" id="detail-threshold">≥5</span>
+            </div>
           </div>
         </div>
       </div>
@@ -974,7 +1169,19 @@
         peak: 'Peak',
         earlyNight: 'Early',
         midNight: 'Middle',
-        lateNightLabel: 'Late'
+        lateNightLabel: 'Late',
+        // Nerd details
+        details: 'Details',
+        detailsSpaceWeather: 'Space Weather',
+        detailsWeather: 'Weather',
+        detailsSunTimes: 'Sun Times',
+        detailsLocation: 'Location',
+        cloudCover: 'Cloud Cover',
+        moonPhase: 'Moon Phase',
+        astroDusk: 'Astro Twilight',
+        astroDawn: 'Astro Dawn',
+        latitude: 'Latitude',
+        kpThreshold: 'Kp Threshold'
       },
       de: {
         title: 'POLARLICHT-VORHERSAGE',
@@ -1045,7 +1252,19 @@
         peak: 'Peak',
         earlyNight: 'Früh',
         midNight: 'Mitte',
-        lateNightLabel: 'Spät'
+        lateNightLabel: 'Spät',
+        // Nerd details
+        details: 'Details',
+        detailsSpaceWeather: 'Weltraumwetter',
+        detailsWeather: 'Wetter',
+        detailsSunTimes: 'Sonnenzeiten',
+        detailsLocation: 'Standort',
+        cloudCover: 'Bewölkung',
+        moonPhase: 'Mondphase',
+        astroDusk: 'Astro Dämmerung',
+        astroDawn: 'Astro Morgen',
+        latitude: 'Breitengrad',
+        kpThreshold: 'Kp Schwelle'
       },
       es: {
         title: 'PRONÓSTICO AURORA',
@@ -1116,7 +1335,19 @@
         peak: 'Pico',
         earlyNight: 'Temprano',
         midNight: 'Medio',
-        lateNightLabel: 'Tarde'
+        lateNightLabel: 'Tarde',
+        // Nerd details
+        details: 'Detalles',
+        detailsSpaceWeather: 'Clima Espacial',
+        detailsWeather: 'Clima',
+        detailsSunTimes: 'Horarios del Sol',
+        detailsLocation: 'Ubicación',
+        cloudCover: 'Nubosidad',
+        moonPhase: 'Fase Lunar',
+        astroDusk: 'Crepúsculo Astro',
+        astroDawn: 'Alba Astro',
+        latitude: 'Latitud',
+        kpThreshold: 'Umbral Kp'
       }
     };
 
@@ -1341,6 +1572,162 @@
         }
       }
       return null;
+    }
+
+    // Solar wind data storage
+    let solarWindData = null;
+
+    // Fetch real-time solar wind data from NOAA
+    async function fetchSolarWind() {
+      try {
+        const res = await fetch('https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json');
+        const plasma = await res.json();
+
+        const res2 = await fetch('https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json');
+        const mag = await res2.json();
+
+        // Get most recent values (last row)
+        if (plasma.length > 1 && mag.length > 1) {
+          const lastPlasma = plasma[plasma.length - 1];
+          const lastMag = mag[mag.length - 1];
+
+          solarWindData = {
+            speed: parseFloat(lastPlasma[2]) || null,  // Solar wind speed km/s
+            density: parseFloat(lastPlasma[1]) || null, // Proton density
+            bz: parseFloat(lastMag[3]) || null,        // Bz component
+            bt: parseFloat(lastMag[6]) || null         // Bt total field
+          };
+        }
+      } catch (e) {
+        console.error('Solar wind fetch failed:', e);
+      }
+    }
+
+    // Calculate moon phase (0 = new moon, 0.5 = full moon)
+    function getMoonPhase(date) {
+      // Known new moon: Jan 6, 2000 at 18:14 UTC
+      const knownNew = new Date('2000-01-06T18:14:00Z');
+      const lunarCycle = 29.53058867; // days
+
+      const daysSince = (date - knownNew) / (1000 * 60 * 60 * 24);
+      const phase = (daysSince % lunarCycle) / lunarCycle;
+
+      return phase < 0 ? phase + 1 : phase;
+    }
+
+    // Get moon phase emoji and percentage
+    function getMoonInfo(date) {
+      const phase = getMoonPhase(date);
+      const illumination = Math.round((1 - Math.cos(phase * 2 * Math.PI)) / 2 * 100);
+
+      let emoji;
+      if (phase < 0.0625) emoji = '🌑';      // New
+      else if (phase < 0.1875) emoji = '🌒'; // Waxing crescent
+      else if (phase < 0.3125) emoji = '🌓'; // First quarter
+      else if (phase < 0.4375) emoji = '🌔'; // Waxing gibbous
+      else if (phase < 0.5625) emoji = '🌕'; // Full
+      else if (phase < 0.6875) emoji = '🌖'; // Waning gibbous
+      else if (phase < 0.8125) emoji = '🌗'; // Last quarter
+      else if (phase < 0.9375) emoji = '🌘'; // Waning crescent
+      else emoji = '🌑';                     // New
+
+      return { emoji, illumination, phase };
+    }
+
+    // Get G-scale from Kp
+    function getGScale(kp) {
+      if (kp < 5) return { level: 0, class: 'g0', label: 'G0' };
+      if (kp < 6) return { level: 1, class: 'g1', label: 'G1' };
+      if (kp < 7) return { level: 2, class: 'g2', label: 'G2' };
+      if (kp < 8) return { level: 3, class: 'g3', label: 'G3' };
+      if (kp < 9) return { level: 4, class: 'g4', label: 'G4' };
+      return { level: 5, class: 'g5', label: 'G5' };
+    }
+
+    // Toggle details panel
+    function toggleDetails() {
+      const toggle = $('details-toggle');
+      const panel = $('details-panel');
+
+      toggle.classList.toggle('open');
+      panel.classList.toggle('open');
+
+      // Update details when opening
+      if (panel.classList.contains('open')) {
+        updateDetails();
+      }
+    }
+
+    // Update details panel content
+    function updateDetails() {
+      const now = new Date();
+      const locale = currentLang === 'de' ? 'de-DE' : currentLang === 'es' ? 'es-ES' : 'en-US';
+      const formatTime = (date) => date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: false });
+
+      // Kp with G-scale
+      if (currentKp !== null) {
+        const g = getGScale(currentKp);
+        $('detail-kp').innerHTML = `${currentKp.toFixed(2)} <span class="g-scale ${g.class}">${g.label}</span>`;
+      }
+
+      // Solar wind data
+      if (solarWindData) {
+        if (solarWindData.bz !== null) {
+          const bzEl = $('detail-bz');
+          const bzClass = solarWindData.bz < -10 ? 'good' : solarWindData.bz < 0 ? 'warning' : '';
+          bzEl.textContent = `${solarWindData.bz.toFixed(1)} nT ${solarWindData.bz < 0 ? '↓' : '↑'}`;
+          bzEl.className = 'details-value ' + bzClass;
+        }
+
+        if (solarWindData.speed !== null) {
+          const windEl = $('detail-wind');
+          const windClass = solarWindData.speed > 600 ? 'good' : solarWindData.speed > 400 ? 'warning' : '';
+          windEl.textContent = `${Math.round(solarWindData.speed)} km/s`;
+          windEl.className = 'details-value ' + windClass;
+        }
+
+        if (solarWindData.bt !== null) {
+          $('detail-bt').textContent = `${solarWindData.bt.toFixed(1)} nT`;
+        }
+      }
+
+      // Cloud cover
+      const cloud = getCloudAt(now);
+      if (cloud !== null) {
+        const cloudEl = $('detail-clouds');
+        const cloudClass = cloud < 25 ? 'good' : cloud > 75 ? 'bad' : '';
+        cloudEl.textContent = `${cloud}%`;
+        cloudEl.className = 'details-value ' + cloudClass;
+      }
+
+      // Moon phase
+      const moon = getMoonInfo(now);
+      const moonEl = $('detail-moon');
+      const moonClass = moon.illumination < 30 ? 'good' : moon.illumination > 70 ? 'bad' : '';
+      moonEl.textContent = `${moon.emoji} ${moon.illumination}%`;
+      moonEl.className = 'details-value ' + moonClass;
+
+      // Sun times
+      const today = new Date(now);
+      today.setHours(12, 0, 0, 0);
+      const darkWindow = getDarkWindow(today);
+
+      if (darkWindow) {
+        $('detail-sunset').textContent = formatTime(darkWindow.sunset);
+        $('detail-dusk').textContent = formatTime(darkWindow.darkStart);
+        $('detail-dawn').textContent = formatTime(darkWindow.darkEnd);
+        $('detail-sunrise').textContent = formatTime(darkWindow.sunrise);
+      }
+
+      // Location
+      if (userLocation) {
+        const latDir = userLocation.lat >= 0 ? 'N' : 'S';
+        $('detail-lat').textContent = `${Math.abs(userLocation.lat).toFixed(2)}° ${latDir}`;
+        $('detail-threshold').textContent = `≥${getKpThreshold(userLocation.lat)}`;
+      } else {
+        $('detail-lat').textContent = '--';
+        $('detail-threshold').textContent = '≥5';
+      }
     }
 
     // Get Kp for a time (checks history for past, forecast for future)
@@ -1829,6 +2216,21 @@
       $('tooltip-aurora-label').textContent = t.tooltipAurora;
       $('tooltip-sky-label').textContent = t.tooltipSky;
       $('tooltip-conditions-label').textContent = t.tooltipConditions;
+
+      // Details panel labels
+      $('details-toggle-text').textContent = t.details;
+      $('details-space-title').textContent = t.detailsSpaceWeather;
+      $('details-weather-title').textContent = t.detailsWeather;
+      $('details-sun-title').textContent = t.detailsSunTimes;
+      $('details-location-title').textContent = t.detailsLocation;
+      $('detail-clouds-label').textContent = t.cloudCover;
+      $('detail-moon-label').textContent = t.moonPhase;
+      $('detail-sunset-label').textContent = t.sunset;
+      $('detail-dusk-label').textContent = t.astroDusk;
+      $('detail-dawn-label').textContent = t.astroDawn;
+      $('detail-sunrise-label').textContent = t.sunrise;
+      $('detail-lat-label').textContent = t.latitude;
+      $('detail-threshold-label').textContent = t.kpThreshold;
     }
 
     // Init
@@ -1839,7 +2241,8 @@
 
         [currentKp, kpForecast] = await Promise.all([
           fetchCurrentKp(),
-          fetchKpForecast()
+          fetchKpForecast(),
+          fetchSolarWind()
         ]);
 
         if (userLocation) {
