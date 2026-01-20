@@ -276,6 +276,34 @@
       background: #151525;
     }
 
+    .chart-slot.is-past {
+      opacity: 0.6;
+    }
+
+    .chart-slot.is-past:hover {
+      opacity: 0.8;
+    }
+
+    .chart-slot.is-now {
+      opacity: 1;
+      position: relative;
+      background: linear-gradient(to bottom, #1e3a5f22 0%, transparent 50%);
+    }
+
+    .now-marker {
+      position: absolute;
+      top: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.6rem;
+      font-weight: 700;
+      color: #3b82f6;
+      background: #1e3a5f;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.05em;
+    }
+
     .slot-bar-container {
       width: 28px;
       height: 80px;
@@ -702,7 +730,7 @@
 
       <div class="chart-section">
         <div class="section-header">
-          <span class="section-title">3-Day Outlook</span>
+          <span class="section-title">5-Day Timeline</span>
         </div>
         <div id="chart-container" class="chart-container scroll-right">
           <div id="chart-scroll" class="chart-scroll">
@@ -836,21 +864,29 @@
       return 'unlikely';
     }
 
-    // Format day
+    // Format day (handles both past and future dates)
     function formatDay(date) {
       const now = new Date();
-      const tomorrow = new Date(now);
-      tomorrow.setDate(tomorrow.getDate() + 1);
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const diffDays = Math.round((dateDay - today) / (24 * 60 * 60 * 1000));
 
-      if (date.toDateString() === now.toDateString()) return 'Today';
-      if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow';
+      if (diffDays === 0) return 'Today';
+      if (diffDays === 1) return 'Tomorrow';
+      if (diffDays === -1) return 'Yesterday';
+      if (diffDays < -1) return date.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' });
       return date.toLocaleDateString('en-US', { weekday: 'short' });
     }
 
-    // Fetch NOAA current Kp
+    // Fetch NOAA current Kp (returns both current value and historical data)
     async function fetchCurrentKp() {
       const res = await fetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json');
       const data = await res.json();
+      // Store historical data globally
+      window.kpHistory = data.slice(1).map(r => ({
+        time: new Date(r[0] + ' UTC'),
+        kp: parseFloat(r[1])
+      }));
       return data.length > 1 ? parseFloat(data[data.length - 1][1]) : null;
     }
 
@@ -880,12 +916,24 @@
       return null;
     }
 
-    // Get Kp for a time
+    // Get Kp for a time (checks history for past, forecast for future)
     function getKpAt(time) {
+      const now = new Date();
+
+      // For past times, check historical data
+      if (time <= now && window.kpHistory && window.kpHistory.length > 0) {
+        for (const e of window.kpHistory) {
+          if (Math.abs(e.time - time) < 1.5 * 60 * 60 * 1000) return e.kp;
+        }
+      }
+
+      // For future times, check forecast
       for (const e of kpForecast) {
         if (Math.abs(e.time - time) < 1.5 * 60 * 60 * 1000) return e.kp;
       }
-      if (time - new Date() < 3 * 60 * 60 * 1000) return currentKp;
+
+      // Fall back to current if within current window
+      if (Math.abs(time - now) < 3 * 60 * 60 * 1000) return currentKp;
       return null;
     }
 
@@ -899,7 +947,11 @@
         weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false
       });
       $('tooltip-chance').textContent = slot.prob + '%';
-      $('tooltip-sky').textContent = cloud.text + (slot.cloud !== null ? ` (${slot.cloud}%)` : '');
+      if (slot.isPast && slot.cloud === null) {
+        $('tooltip-sky').textContent = 'No data (historical)';
+      } else {
+        $('tooltip-sky').textContent = cloud.text + (slot.cloud !== null ? ` (${slot.cloud}%)` : '');
+      }
       $('tooltip-conditions').textContent = slot.isNight ? 'Dark' : 'Daylight';
 
       tooltip.style.left = Math.min(rect.left, window.innerWidth - 210) + 'px';
@@ -911,26 +963,37 @@
       tooltip.classList.remove('visible');
     }
 
-    // Build chart
+    // Build chart with historical data
     function renderChart() {
       const now = new Date();
       const slots = [];
 
       // Align to UTC 3-hour blocks (NOAA measurement windows)
-      let t = new Date(now);
-      const utcHour = t.getUTCHours();
+      let currentBlock = new Date(now);
+      const utcHour = currentBlock.getUTCHours();
       const utcAlignedHour = Math.floor(utcHour / 3) * 3;
-      t.setUTCHours(utcAlignedHour, 0, 0, 0);
+      currentBlock.setUTCHours(utcAlignedHour, 0, 0, 0);
 
-      // 24 slots = 72 hours (3 days) - matches NOAA forecast range
-      for (let i = 0; i < 24; i++) {
+      // Start 2 days (16 slots × 3h = 48h) before current block
+      let t = new Date(currentBlock.getTime() - 16 * 3 * 60 * 60 * 1000);
+
+      // 40 slots total: 16 historical + 24 forecast = 120 hours (5 days)
+      let nowSlotIndex = -1;
+      for (let i = 0; i < 40; i++) {
         const localHour = t.getHours();
         const isNight = localHour >= 20 || localHour < 6;
         const kp = getKpAt(t);
-        const cloud = getCloudAt(t);
+        const isPast = t < currentBlock;
+        // No cloud data for historical (Open-Meteo doesn't provide it)
+        const cloud = isPast ? null : getCloudAt(t);
         const prob = calcProbability(kp, isNight, userLocation?.lat);
 
-        slots.push({ time: new Date(t), hour: localHour, isNight, kp, cloud, prob });
+        // Track which slot is "now"
+        if (t.getTime() === currentBlock.getTime()) {
+          nowSlotIndex = i;
+        }
+
+        slots.push({ time: new Date(t), hour: localHour, isNight, kp, cloud, prob, isPast });
         t = new Date(t.getTime() + 3 * 60 * 60 * 1000);
       }
 
@@ -941,19 +1004,21 @@
         const dayStr = slot.time.toDateString();
         const showDay = dayStr !== lastDay;
         lastDay = dayStr;
+        const isNowSlot = i === nowSlotIndex;
 
         return `
-          <div class="chart-slot ${slot.isNight ? 'is-night' : ''}"
+          <div class="chart-slot ${slot.isNight ? 'is-night' : ''} ${slot.isPast ? 'is-past' : ''} ${isNowSlot ? 'is-now' : ''}"
                data-index="${i}"
                ontouchstart="showTooltip(event, chartSlots[${i}])"
                ontouchend="hideTooltip()"
                onmouseenter="showTooltip(event, chartSlots[${i}])"
                onmouseleave="hideTooltip()">
+            ${isNowSlot ? '<div class="now-marker">NOW</div>' : ''}
             <div class="slot-percent">${slot.prob > 0 ? slot.prob + '%' : ''}</div>
             <div class="slot-bar-container">
               <div class="slot-bar ${status} animate" data-height="${slot.prob}"></div>
             </div>
-            <div class="slot-cloud">${cloudInfo.icon}</div>
+            <div class="slot-cloud">${slot.isPast && slot.cloud === null ? '·' : cloudInfo.icon}</div>
             <div class="slot-time">${String(slot.hour).padStart(2, '0')}:00</div>
             ${showDay ? `<div class="slot-day">${formatDay(slot.time)}</div>` : '<div class="slot-day"></div>'}
           </div>
@@ -970,9 +1035,21 @@
           setTimeout(() => {
             bar.style.height = bar.dataset.height + '%';
             bar.classList.remove('animate');
-          }, i * 50);
+          }, i * 30); // Faster animation for more bars
         });
       });
+
+      // Scroll to NOW position after render
+      setTimeout(() => {
+        if (nowSlotIndex >= 0) {
+          const nowEl = chartGrid.querySelector('.is-now');
+          if (nowEl) {
+            const scrollPos = nowEl.offsetLeft - chartScroll.clientWidth / 2 + nowEl.clientWidth / 2;
+            chartScroll.scrollLeft = Math.max(0, scrollPos);
+          }
+        }
+        updateScrollIndicators();
+      }, 100);
     }
 
     // Update main status
