@@ -1857,6 +1857,72 @@
       }
     }
 
+    // Decode NOAA alert message to human-readable format
+    function decodeNOAAAlert(msg) {
+      if (!msg) return null;
+
+      // Extract message code (ALTK04-09, WATA/WATK, ALTEF, etc.)
+      const codeMatch = msg.match(/Message Code:\s*(\w+)/i);
+      const code = codeMatch ? codeMatch[1] : '';
+
+      // ALTK = K-index alert (Kp threshold reached/expected)
+      if (code.startsWith('ALTK')) {
+        const kp = code.replace('ALTK', '');
+        const gScale = kp >= 9 ? 'G5' : kp >= 8 ? 'G4' : kp >= 7 ? 'G3' : kp >= 6 ? 'G2' : kp >= 5 ? 'G1' : '';
+        return { icon: '⚡', text: `Kp ${kp} ${gScale ? '(' + gScale + ')' : ''} erreicht`, severity: parseInt(kp) };
+      }
+
+      // WATA = Geomagnetic storm watch (A-index)
+      if (code.startsWith('WATA')) {
+        const match = msg.match(/G(\d)/);
+        const g = match ? match[1] : '?';
+        return { icon: '👁️', text: `G${g} Sturm-Warnung aktiv`, severity: parseInt(g) + 4 };
+      }
+
+      // WATK = K-index watch
+      if (code.startsWith('WATK')) {
+        const kp = code.replace('WATK', '');
+        return { icon: '👁️', text: `Kp ${kp} Watch`, severity: parseInt(kp) };
+      }
+
+      // WARK = K-index warning
+      if (code.startsWith('WARK')) {
+        const kp = code.replace('WARK', '');
+        return { icon: '⚠️', text: `Kp ${kp} Warnung`, severity: parseInt(kp) };
+      }
+
+      // SUMA = Summary (geomagnetic activity)
+      if (code.startsWith('SUM')) {
+        return { icon: '📊', text: 'Aktivitäts-Zusammenfassung', severity: 0 };
+      }
+
+      // ALTEF = Electron flux alert
+      if (code === 'ALTEF') {
+        return { icon: '☢️', text: 'Elektronen-Flux erhöht', severity: 3 };
+      }
+
+      // ALTPX = Proton event
+      if (code.startsWith('ALTP')) {
+        return { icon: '☢️', text: 'Protonen-Event', severity: 4 };
+      }
+
+      // ALTXMF = X-ray flux (solar flare)
+      if (code.startsWith('ALTX')) {
+        const match = msg.match(/([ABCMX]\d*\.?\d*)/);
+        const flare = match ? match[1] : '';
+        return { icon: '☀️', text: `Sonnenflare ${flare}`, severity: flare.startsWith('X') ? 6 : flare.startsWith('M') ? 4 : 2 };
+      }
+
+      // Fallback: extract G-scale if present
+      const gMatch = msg.match(/G([1-5])/);
+      if (gMatch) {
+        return { icon: '⚠️', text: `G${gMatch[1]} Geomagnetisch`, severity: parseInt(gMatch[1]) + 4 };
+      }
+
+      // Unknown - show code
+      return { icon: '📢', text: code || msg.substring(0, 40), severity: 1 };
+    }
+
     // Calculate moon phase (0 = new moon, 0.5 = full moon)
     function getMoonPhase(date) {
       // Known new moon: Jan 6, 2000 at 18:14 UTC
@@ -1985,11 +2051,16 @@
       const alertsList = $('alerts-list');
       if (noaaAlerts && noaaAlerts.length > 0) {
         alertsSection.style.display = 'block';
-        alertsList.innerHTML = noaaAlerts.map(alert => {
-          const msg = alert.message || '';
-          const shortMsg = msg.split('\n')[0].substring(0, 100);
-          return `<div class="alert-item">${shortMsg}</div>`;
-        }).join('');
+        // Decode and deduplicate alerts
+        const decoded = noaaAlerts
+          .map(alert => decodeNOAAAlert(alert.message))
+          .filter(d => d !== null);
+        // Sort by severity (highest first) and deduplicate by text
+        const unique = [...new Map(decoded.map(d => [d.text, d])).values()]
+          .sort((a, b) => b.severity - a.severity);
+        alertsList.innerHTML = unique.map(d =>
+          `<div class="alert-item">${d.icon} ${d.text}</div>`
+        ).join('');
       } else {
         alertsSection.style.display = 'none';
       }
