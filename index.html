@@ -744,6 +744,20 @@
       color: #f87171;
     }
 
+    .alerts-list {
+      margin-top: 8px;
+    }
+
+    .alert-item {
+      background: #3b1a1a;
+      border-left: 3px solid #ef4444;
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      font-size: 0.75rem;
+      color: #fca5a5;
+      border-radius: 4px;
+    }
+
     .g-scale {
       display: inline-block;
       padding: 2px 6px;
@@ -872,6 +886,20 @@
               <span class="details-label">Bt Total</span>
               <span class="details-value" id="detail-bt">-- nT</span>
             </div>
+            <div class="details-row">
+              <span class="details-label">Dst Index</span>
+              <span class="details-value" id="detail-dst">-- nT</span>
+            </div>
+            <div class="details-row">
+              <span class="details-label">ACE Arrival</span>
+              <span class="details-value" id="detail-ace">-- min</span>
+            </div>
+          </div>
+
+          <!-- NOAA Alerts Section -->
+          <div class="details-section" id="alerts-section" style="display:none;">
+            <div class="details-section-title">⚠️ Active Alerts</div>
+            <div id="alerts-list" class="alerts-list"></div>
           </div>
 
           <!-- Weather Section -->
@@ -1074,7 +1102,9 @@
         alertsDenied: 'Notifications blocked',
         alertsNotSupported: 'Notifications not supported',
         kpSpikeTitle: 'Aurora Alert!',
-        kpSpikeBody: 'Kp index jumped to {kp} ({g}) - check for aurora!'
+        kpSpikeBody: 'Kp index jumped to {kp} ({g}) - check for aurora!',
+        aceAlertTitle: 'Aurora Incoming!',
+        aceAlertBody: 'Solar wind spike detected! Aurora possible in ~{mins} minutes'
       },
       de: {
         title: 'POLARLICHT-VORHERSAGE',
@@ -1172,7 +1202,9 @@
         alertsDenied: 'Benachrichtigungen blockiert',
         alertsNotSupported: 'Nicht unterstützt',
         kpSpikeTitle: 'Polarlicht-Alarm!',
-        kpSpikeBody: 'Kp-Index auf {kp} ({g}) gestiegen - schau nach Polarlichtern!'
+        kpSpikeBody: 'Kp-Index auf {kp} ({g}) gestiegen - schau nach Polarlichtern!',
+        aceAlertTitle: 'Polarlicht im Anflug!',
+        aceAlertBody: 'Sonnenwind-Spitze erkannt! Aurora möglich in ~{mins} Minuten'
       },
       es: {
         title: 'PRONÓSTICO AURORA',
@@ -1270,7 +1302,9 @@
         alertsDenied: 'Notificaciones bloqueadas',
         alertsNotSupported: 'No soportado',
         kpSpikeTitle: '¡Alerta de aurora!',
-        kpSpikeBody: 'Índice Kp subió a {kp} ({g}) - ¡busca auroras!'
+        kpSpikeBody: 'Índice Kp subió a {kp} ({g}) - ¡busca auroras!',
+        aceAlertTitle: '¡Aurora en camino!',
+        aceAlertBody: '¡Pico de viento solar detectado! Aurora posible en ~{mins} minutos'
       }
     };
 
@@ -1636,6 +1670,166 @@
       }
     }
 
+    // ACE/DSCOVR real-time data storage (15-60 min early warning)
+    let aceData = null;
+
+    // Fetch ACE/DSCOVR real-time data (measured at L1 point, ~1M km from Earth)
+    async function fetchACEData() {
+      try {
+        // Real-time solar wind from DSCOVR (replaced ACE in 2016)
+        const res = await fetch('https://services.swpc.noaa.gov/products/solar-wind/plasma-1-day.json');
+        const plasma = await res.json();
+
+        const res2 = await fetch('https://services.swpc.noaa.gov/products/solar-wind/mag-1-day.json');
+        const mag = await res2.json();
+
+        if (plasma.length > 1 && mag.length > 1) {
+          const lastPlasma = plasma[plasma.length - 1];
+          const lastMag = mag[mag.length - 1];
+
+          aceData = {
+            timestamp: lastPlasma[0],
+            speed: parseFloat(lastPlasma[2]) || null,
+            density: parseFloat(lastPlasma[1]) || null,
+            bz: parseFloat(lastMag[3]) || null,
+            bt: parseFloat(lastMag[6]) || null,
+            // Calculate estimated arrival time (L1 is ~1.5M km away)
+            arrivalMinutes: lastPlasma[2] ? Math.round(1500000 / parseFloat(lastPlasma[2]) / 60) : null
+          };
+
+          // Check for incoming CME/storm conditions
+          checkACEAlert();
+        }
+        return true;
+      } catch (e) {
+        console.error('ACE data fetch failed:', e);
+        return false;
+      }
+    }
+
+    // Check ACE data for incoming storm conditions
+    function checkACEAlert() {
+      if (!aceData || !notificationsEnabled) return;
+
+      // Alert conditions: Strong southward Bz (<-10nT) + high speed (>500km/s) + high density (>10/cc)
+      const isStormIncoming = aceData.bz !== null && aceData.bz < -10 &&
+                              aceData.speed !== null && aceData.speed > 500;
+
+      if (isStormIncoming && aceData.arrivalMinutes) {
+        const lastACEAlert = localStorage.getItem('lastACEAlert');
+        const now = Date.now();
+
+        // Don't spam - only alert once per hour
+        if (!lastACEAlert || now - parseInt(lastACEAlert) > 3600000) {
+          sendACENotification(aceData);
+          localStorage.setItem('lastACEAlert', now.toString());
+        }
+      }
+    }
+
+    // Send ACE early warning notification
+    function sendACENotification(data) {
+      if (!notificationsEnabled || Notification.permission !== 'granted') return;
+
+      const mins = data.arrivalMinutes || '?';
+      const notification = new Notification('🚀 ' + (t.aceAlertTitle || 'Aurora Incoming!'), {
+        body: (t.aceAlertBody || 'Solar wind spike detected! Aurora possible in ~{mins} minutes').replace('{mins}', mins),
+        icon: 'icon-192.png',
+        badge: 'icon-192.png',
+        tag: 'ace-alert',
+        renotify: true,
+        requireInteraction: true
+      });
+
+      notification.onclick = function() {
+        window.focus();
+        notification.close();
+      };
+    }
+
+    // 27-day solar forecast storage
+    let forecast27Day = null;
+
+    // Fetch 27-day Kp forecast (based on solar rotation)
+    async function fetch27DayForecast() {
+      try {
+        const res = await fetch('https://services.swpc.noaa.gov/text/27-day-outlook.txt');
+        const text = await res.text();
+
+        // Parse the text file for Kp predictions
+        const lines = text.split('\n');
+        const forecasts = [];
+
+        for (const line of lines) {
+          // Format: "2024 Jan 20   5   3   0.05  15"
+          const match = line.match(/^\d{4}\s+\w{3}\s+(\d+)\s+(\d+)/);
+          if (match) {
+            forecasts.push({
+              day: parseInt(match[1]),
+              kp: parseInt(match[2])
+            });
+          }
+        }
+
+        forecast27Day = forecasts;
+        return true;
+      } catch (e) {
+        console.error('27-day forecast fetch failed:', e);
+        return false;
+      }
+    }
+
+    // Dst index storage
+    let dstIndex = null;
+
+    // Fetch Dst index (geomagnetic storm intensity)
+    async function fetchDstIndex() {
+      try {
+        const res = await fetch('https://services.swpc.noaa.gov/products/kyoto-dst.json');
+        const data = await res.json();
+
+        if (data.length > 1) {
+          const last = data[data.length - 1];
+          dstIndex = {
+            timestamp: last[0],
+            value: parseInt(last[1]) || null
+          };
+        }
+        return true;
+      } catch (e) {
+        console.error('Dst fetch failed:', e);
+        return false;
+      }
+    }
+
+    // NOAA Alerts storage
+    let noaaAlerts = [];
+
+    // Fetch NOAA space weather alerts
+    async function fetchNOAAAlerts() {
+      try {
+        const res = await fetch('https://services.swpc.noaa.gov/products/alerts.json');
+        const data = await res.json();
+
+        // Filter for geomagnetic alerts (G-scale warnings)
+        noaaAlerts = data.filter(alert =>
+          alert.message && (
+            alert.message.includes('Geomagnetic') ||
+            alert.message.includes('G1') ||
+            alert.message.includes('G2') ||
+            alert.message.includes('G3') ||
+            alert.message.includes('G4') ||
+            alert.message.includes('G5')
+          )
+        ).slice(0, 5); // Keep latest 5
+
+        return true;
+      } catch (e) {
+        console.error('NOAA alerts fetch failed:', e);
+        return false;
+      }
+    }
+
     // Calculate moon phase (0 = new moon, 0.5 = full moon)
     function getMoonPhase(date) {
       // Known new moon: Jan 6, 2000 at 18:14 UTC
@@ -1739,6 +1933,38 @@
         if (solarWindData.bt !== null) {
           $('detail-bt').textContent = `${solarWindData.bt.toFixed(1)} nT`;
         }
+      }
+
+      // Dst index
+      if (dstIndex && dstIndex.value !== null) {
+        const dstEl = $('detail-dst');
+        const dstClass = dstIndex.value < -100 ? 'good' : dstIndex.value < -50 ? 'warning' : '';
+        dstEl.textContent = `${dstIndex.value} nT`;
+        dstEl.className = 'details-value ' + dstClass;
+      }
+
+      // ACE arrival time
+      if (aceData && aceData.arrivalMinutes) {
+        const aceEl = $('detail-ace');
+        aceEl.textContent = `~${aceData.arrivalMinutes} min`;
+        // Highlight if storm conditions
+        if (aceData.bz < -10 && aceData.speed > 500) {
+          aceEl.className = 'details-value good';
+        }
+      }
+
+      // NOAA Alerts
+      const alertsSection = $('alerts-section');
+      const alertsList = $('alerts-list');
+      if (noaaAlerts && noaaAlerts.length > 0) {
+        alertsSection.style.display = 'block';
+        alertsList.innerHTML = noaaAlerts.map(alert => {
+          const msg = alert.message || '';
+          const shortMsg = msg.split('\n')[0].substring(0, 100);
+          return `<div class="alert-item">${shortMsg}</div>`;
+        }).join('');
+      } else {
+        alertsSection.style.display = 'none';
       }
 
       // Cloud cover
@@ -2173,8 +2399,18 @@
         }
 
       } catch (err) {
+        console.error('Location error:', err);
         locationChipText.textContent = t.locationFailed;
-        locationStatus.textContent = t.locationHelp;
+        // Show more specific error message
+        if (err.code === 1) {
+          locationStatus.textContent = t.locationHelp; // Permission denied
+        } else if (err.code === 2) {
+          locationStatus.textContent = 'Position unavailable';
+        } else if (err.code === 3) {
+          locationStatus.textContent = 'Location timeout';
+        } else {
+          locationStatus.textContent = err.message || t.locationHelp;
+        }
         setTimeout(() => {
           locationChipText.textContent = t.tryAgain;
         }, 2000);
@@ -2240,8 +2476,14 @@
         [currentKp, kpForecast] = await Promise.all([
           fetchCurrentKp(),
           fetchKpForecast(),
-          fetchSolarWind()
+          fetchSolarWind(),
+          fetchACEData(),
+          fetchDstIndex(),
+          fetchNOAAAlerts()
         ]);
+
+        // Fetch 27-day forecast in background (less critical)
+        fetch27DayForecast();
 
         if (userLocation) {
           try {
@@ -2417,7 +2659,7 @@
         registrations.forEach(r => r.unregister());
       });
       setTimeout(() => {
-        navigator.serviceWorker.register('sw.js?v=25').catch(() => {});
+        navigator.serviceWorker.register('sw.js?v=26').catch(() => {});
       }, 100);
     }
 
