@@ -167,6 +167,80 @@
       margin-top: 2px;
     }
 
+    /* Tonight Section */
+    .tonight-section {
+      background: linear-gradient(145deg, #12121a 0%, #1a1a2e 100%);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 20px;
+      border: 1px solid #252540;
+      opacity: 0;
+      animation: fadeInUp 0.6s ease forwards 0.15s;
+    }
+
+    .tonight-header {
+      font-size: 0.8rem;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 500;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .tonight-slots {
+      display: flex;
+      justify-content: space-around;
+      gap: 8px;
+    }
+
+    .tonight-slot {
+      flex: 1;
+      text-align: center;
+      padding: 12px 8px;
+      background: #0a0a12;
+      border-radius: 12px;
+    }
+
+    .tonight-time {
+      font-size: 0.7rem;
+      color: #6b7280;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .tonight-prob {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .tonight-prob.good { color: #4ade80; }
+    .tonight-prob.possible { color: #facc15; }
+    .tonight-prob.unlikely { color: #6b7280; }
+
+    .tonight-cloud {
+      font-size: 1.1rem;
+    }
+
+    .tonight-best {
+      text-align: center;
+      margin-top: 12px;
+      font-size: 0.85rem;
+      color: #9ca3af;
+      padding-top: 12px;
+      border-top: 1px solid #252540;
+    }
+
+    .tonight-best:empty {
+      display: none;
+    }
+
+    .tonight-best strong {
+      color: #4ade80;
+    }
+
     /* Chart Section */
     .chart-section {
       opacity: 0;
@@ -728,6 +802,28 @@
         </div>
       </div>
 
+      <div id="tonight-section" class="tonight-section">
+        <div class="tonight-header">Tonight's Forecast</div>
+        <div class="tonight-slots">
+          <div class="tonight-slot">
+            <div class="tonight-time" id="tonight-time-1">Evening</div>
+            <div class="tonight-prob" id="tonight-prob-1">--%</div>
+            <div class="tonight-cloud" id="tonight-cloud-1">--</div>
+          </div>
+          <div class="tonight-slot">
+            <div class="tonight-time" id="tonight-time-2">Midnight</div>
+            <div class="tonight-prob" id="tonight-prob-2">--%</div>
+            <div class="tonight-cloud" id="tonight-cloud-2">--</div>
+          </div>
+          <div class="tonight-slot">
+            <div class="tonight-time" id="tonight-time-3">Late Night</div>
+            <div class="tonight-prob" id="tonight-prob-3">--%</div>
+            <div class="tonight-cloud" id="tonight-cloud-3">--</div>
+          </div>
+        </div>
+        <div class="tonight-best" id="tonight-best"></div>
+      </div>
+
       <div class="chart-section">
         <div class="section-header">
           <span class="section-title">10-Day Timeline</span>
@@ -1052,6 +1148,90 @@
       }, 100);
     }
 
+    // Render tonight's forecast section
+    function renderTonightForecast() {
+      const now = new Date();
+      const hour = now.getHours();
+
+      // Find tonight's key viewing times
+      // Evening: 21:00, Midnight: 00:00, Late night: 03:00
+      const slots = [];
+
+      // Calculate target times for tonight
+      let evening = new Date(now);
+      let midnight = new Date(now);
+      let lateNight = new Date(now);
+
+      // Set evening to 21:00 today
+      evening.setHours(21, 0, 0, 0);
+
+      // Set midnight to 00:00 (next day if we're past midnight)
+      midnight.setHours(0, 0, 0, 0);
+      if (hour >= 0 && hour < 6) {
+        // Already past midnight tonight, use today's midnight
+      } else {
+        // Use tomorrow's midnight
+        midnight.setDate(midnight.getDate() + 1);
+      }
+
+      // Set late night to 03:00
+      lateNight.setHours(3, 0, 0, 0);
+      if (hour >= 3 && hour < 21) {
+        // Use tomorrow's 03:00
+        lateNight.setDate(lateNight.getDate() + 1);
+      } else if (hour >= 21) {
+        // Use tomorrow's 03:00
+        lateNight.setDate(lateNight.getDate() + 1);
+      }
+
+      // If evening is in the past (it's late night now), show tomorrow evening
+      if (evening < now && hour >= 0 && hour < 6) {
+        evening.setDate(evening.getDate() + 1);
+      }
+
+      // Build the three slots
+      const times = [
+        { time: evening, label: '21:00', name: 'Evening' },
+        { time: midnight, label: '00:00', name: 'Midnight' },
+        { time: lateNight, label: '03:00', name: 'Late Night' }
+      ];
+
+      // Sort by time
+      times.sort((a, b) => a.time - b.time);
+
+      // Calculate probabilities for each slot
+      let bestSlot = null;
+      let bestProb = -1;
+
+      times.forEach((slot, i) => {
+        const kp = getKpAt(slot.time);
+        const cloud = getCloudAt(slot.time);
+        const prob = calcProbability(kp, true, userLocation?.lat); // Always night for these times
+        const status = getStatus(prob);
+        const cloudInfo = getCloudInfo(cloud, true);
+
+        // Update DOM
+        $(`tonight-time-${i + 1}`).textContent = slot.label;
+        $(`tonight-prob-${i + 1}`).textContent = prob + '%';
+        $(`tonight-prob-${i + 1}`).className = 'tonight-prob ' + status;
+        $(`tonight-cloud-${i + 1}`).textContent = cloudInfo.icon;
+
+        // Track best slot
+        if (prob > bestProb) {
+          bestProb = prob;
+          bestSlot = slot;
+        }
+      });
+
+      // Show best time recommendation
+      const tonightBest = $('tonight-best');
+      if (bestProb >= 25) {
+        tonightBest.innerHTML = `Best viewing: <strong>${bestSlot.label}</strong> (${bestProb}%)`;
+      } else {
+        tonightBest.textContent = 'Low activity expected tonight';
+      }
+    }
+
     // Update main status
     function updateStatus() {
       const now = new Date();
@@ -1214,6 +1394,7 @@
         onboardingEl.classList.add('hidden');
         updateStatus();
         renderChart();
+        renderTonightForecast();
 
       } catch (err) {
         locationBtnText.textContent = 'Location failed';
@@ -1254,6 +1435,7 @@
 
         updateStatus();
         renderChart();
+        renderTonightForecast();
         checkOnboarding();
         checkTapHint();
 
