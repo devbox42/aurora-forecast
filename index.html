@@ -755,31 +755,31 @@
 
   <div class="container">
     <header>
-      <h1>AURORA FORECAST</h1>
+      <h1 id="app-title">AURORA FORECAST</h1>
     </header>
 
     <div id="loading" class="loading">
       <div class="loading-spinner"></div>
-      <p class="loading-text">Loading aurora data...</p>
-      <p class="loading-subtext">Fetching space weather from NOAA</p>
+      <p id="loading-text" class="loading-text">Loading aurora data...</p>
+      <p id="loading-subtext" class="loading-subtext">Fetching space weather from NOAA</p>
     </div>
 
     <div id="error" class="error hidden">
-      <div class="error-title">Unable to load data</div>
+      <div id="error-title" class="error-title">Unable to load data</div>
       <div id="error-message">Please check your connection</div>
-      <button class="error-retry" onclick="location.reload()">Try Again</button>
+      <button id="error-retry" class="error-retry" onclick="location.reload()">Try Again</button>
     </div>
 
     <main id="main-content" class="hidden">
 
       <div id="onboarding" class="onboarding-hint hidden">
         <span class="hint-icon">📍</span>
-        <span class="hint-text">Add your location below to get a personalized aurora forecast based on your latitude and local weather.</span>
+        <span id="onboarding-text" class="hint-text">Add your location below to get a personalized aurora forecast based on your latitude and local weather.</span>
         <button class="hint-dismiss" onclick="dismissOnboarding()">×</button>
       </div>
 
       <div class="status-card">
-        <div class="status-time-label">Right Now</div>
+        <div id="status-time-label" class="status-time-label">Right Now</div>
         <div id="status-indicator" class="status-indicator status-unlikely">
           <span id="status-emoji">🌙</span>
         </div>
@@ -789,21 +789,21 @@
         <div class="stats-row">
           <div class="stat-item">
             <div id="stat-chance" class="stat-value">--%</div>
-            <div class="stat-label">Now</div>
+            <div id="stat-now-label" class="stat-label">Now</div>
           </div>
           <div class="stat-item">
             <div id="stat-clouds" class="stat-value">--</div>
-            <div class="stat-label">Sky</div>
+            <div id="stat-sky-label" class="stat-label">Sky</div>
           </div>
           <div class="stat-item">
             <div id="stat-direction" class="stat-value">N</div>
-            <div class="stat-label">Look</div>
+            <div id="stat-look-label" class="stat-label">Look</div>
           </div>
         </div>
       </div>
 
       <div id="tonight-section" class="tonight-section">
-        <div class="tonight-header">Tonight's Forecast</div>
+        <div id="tonight-header" class="tonight-header">Tonight's Forecast</div>
         <div class="tonight-slots">
           <div class="tonight-slot">
             <div class="tonight-time" id="tonight-time-1">Evening</div>
@@ -826,7 +826,7 @@
 
       <div class="chart-section">
         <div class="section-header">
-          <span class="section-title">10-Day Timeline</span>
+          <span id="chart-title" class="section-title">10-Day Timeline</span>
         </div>
         <div id="chart-container" class="chart-container scroll-right">
           <div id="chart-scroll" class="chart-scroll">
@@ -837,11 +837,11 @@
           <div id="scroll-hint" class="scroll-hint">→</div>
         </div>
         <div class="chart-legend">
-          <div class="legend-item"><div class="legend-dot good"></div> Good chance</div>
-          <div class="legend-item"><div class="legend-dot possible"></div> Possible</div>
-          <div class="legend-item"><div class="legend-dot unlikely"></div> Unlikely</div>
+          <div class="legend-item"><div class="legend-dot good"></div> <span id="legend-good">Good chance</span></div>
+          <div class="legend-item"><div class="legend-dot possible"></div> <span id="legend-possible">Possible</span></div>
+          <div class="legend-item"><div class="legend-dot unlikely"></div> <span id="legend-unlikely">Unlikely</span></div>
         </div>
-        <div id="tap-hint" class="tap-hint hidden"><span>Tap bars for details</span></div>
+        <div id="tap-hint" class="tap-hint hidden"><span id="tap-hint-text">Tap bars for details</span></div>
         <div id="update-time" class="update-time"></div>
       </div>
 
@@ -864,12 +864,216 @@
 
   <div id="tooltip" class="tooltip">
     <div class="tooltip-title" id="tooltip-title">--</div>
-    <div class="tooltip-row"><span>Aurora</span><span class="tooltip-value" id="tooltip-chance">--%</span></div>
-    <div class="tooltip-row"><span>Sky</span><span class="tooltip-value" id="tooltip-sky">--</span></div>
-    <div class="tooltip-row"><span>Conditions</span><span class="tooltip-value" id="tooltip-conditions">--</span></div>
+    <div class="tooltip-row"><span id="tooltip-aurora-label">Aurora</span><span class="tooltip-value" id="tooltip-chance">--%</span></div>
+    <div class="tooltip-row"><span id="tooltip-sky-label">Sky</span><span class="tooltip-value" id="tooltip-sky">--</span></div>
+    <div class="tooltip-row"><span id="tooltip-conditions-label">Conditions</span><span class="tooltip-value" id="tooltip-conditions">--</span></div>
   </div>
 
   <script>
+    // Translations
+    const translations = {
+      en: {
+        title: 'AURORA FORECAST',
+        rightNow: 'Right Now',
+        loading: 'Loading aurora data...',
+        loadingSub: 'Fetching space weather from NOAA',
+        errorTitle: 'Unable to load data',
+        errorMsg: 'Please check your connection',
+        tryAgain: 'Try Again',
+        onboarding: 'Add your location below to get a personalized aurora forecast based on your latitude and local weather.',
+        tonightForecast: "Tonight's Forecast",
+        evening: 'Evening',
+        midnight: 'Midnight',
+        lateNight: 'Late Night',
+        bestViewing: 'Best viewing:',
+        lowActivity: 'Low activity expected tonight',
+        timeline: '10-Day Timeline',
+        goodChance: 'Good chance',
+        possible: 'Possible',
+        unlikely: 'Unlikely',
+        tapHint: 'Tap bars for details',
+        updatedNow: 'Updated just now',
+        updatedMins: 'Updated {n} min ago',
+        updatedMinsPlural: 'Updated {n} mins ago',
+        updatedAt: 'Updated at {time}',
+        enableLocation: 'Enable Location',
+        updateLocation: 'Update Location',
+        locating: 'Locating...',
+        fetchingWeather: 'Fetching weather...',
+        locationFailed: 'Location failed',
+        locationHelp: 'Enable location access in your browser settings',
+        statusGood: 'GOOD CHANCE',
+        statusPossible: 'POSSIBLE',
+        statusUnlikely: 'UNLIKELY',
+        subtitleGoodNight: 'Head outside and look north!',
+        subtitleGoodDay: 'Get ready for tonight!',
+        subtitlePossibleNight: 'Worth checking the sky',
+        subtitlePossibleDay: 'Keep an eye on conditions',
+        subtitleUnlikelyNight: 'Low activity tonight',
+        subtitleUnlikelyDay: 'Aurora needs darkness',
+        today: 'Today',
+        tomorrow: 'Tomorrow',
+        yesterday: 'Yesterday',
+        now: 'NOW',
+        nowLabel: 'Now',
+        skyLabel: 'Sky',
+        lookLabel: 'Look',
+        north: 'N',
+        south: 'S',
+        tooltipAurora: 'Aurora',
+        tooltipSky: 'Sky',
+        tooltipConditions: 'Conditions',
+        tooltipDark: 'Dark',
+        tooltipDaylight: 'Daylight',
+        tooltipNoData: 'No data (historical)',
+        locPrime: 'Prime aurora zone',
+        locExcellent: 'Excellent for aurora',
+        locGood: 'Good aurora visibility',
+        locModerate: 'Moderate aurora chance',
+        locStrong: 'Aurora during strong storms',
+        locRare: 'Aurora only during rare major storms',
+        refreshing: 'Refreshing...',
+        releaseRefresh: 'Release to refresh'
+      },
+      de: {
+        title: 'POLARLICHT-VORHERSAGE',
+        rightNow: 'Jetzt gerade',
+        loading: 'Lade Aurora-Daten...',
+        loadingSub: 'Hole Weltraumwetter von NOAA',
+        errorTitle: 'Laden fehlgeschlagen',
+        errorMsg: 'Bitte Verbindung prüfen',
+        tryAgain: 'Erneut versuchen',
+        onboarding: 'Aktiviere deinen Standort für eine personalisierte Vorhersage basierend auf Breitengrad und lokalem Wetter.',
+        tonightForecast: 'Heute Nacht',
+        evening: 'Abend',
+        midnight: 'Mitternacht',
+        lateNight: 'Spätnacht',
+        bestViewing: 'Beste Zeit:',
+        lowActivity: 'Geringe Aktivität erwartet',
+        timeline: '10-Tage-Übersicht',
+        goodChance: 'Gute Chance',
+        possible: 'Möglich',
+        unlikely: 'Unwahrscheinlich',
+        tapHint: 'Tippe für Details',
+        updatedNow: 'Gerade aktualisiert',
+        updatedMins: 'Vor {n} Min. aktualisiert',
+        updatedMinsPlural: 'Vor {n} Min. aktualisiert',
+        updatedAt: 'Aktualisiert um {time}',
+        enableLocation: 'Standort aktivieren',
+        updateLocation: 'Standort aktualisieren',
+        locating: 'Ortung...',
+        fetchingWeather: 'Lade Wetter...',
+        locationFailed: 'Ortung fehlgeschlagen',
+        locationHelp: 'Standortzugriff in den Browsereinstellungen aktivieren',
+        statusGood: 'GUTE CHANCE',
+        statusPossible: 'MÖGLICH',
+        statusUnlikely: 'UNWAHRSCHEINLICH',
+        subtitleGoodNight: 'Raus gehen und nach Norden schauen!',
+        subtitleGoodDay: 'Mach dich bereit für heute Nacht!',
+        subtitlePossibleNight: 'Ein Blick lohnt sich',
+        subtitlePossibleDay: 'Bedingungen im Auge behalten',
+        subtitleUnlikelyNight: 'Geringe Aktivität heute Nacht',
+        subtitleUnlikelyDay: 'Aurora braucht Dunkelheit',
+        today: 'Heute',
+        tomorrow: 'Morgen',
+        yesterday: 'Gestern',
+        now: 'JETZT',
+        nowLabel: 'Jetzt',
+        skyLabel: 'Himmel',
+        lookLabel: 'Richtung',
+        north: 'N',
+        south: 'S',
+        tooltipAurora: 'Aurora',
+        tooltipSky: 'Himmel',
+        tooltipConditions: 'Bedingungen',
+        tooltipDark: 'Dunkel',
+        tooltipDaylight: 'Tageslicht',
+        tooltipNoData: 'Keine Daten (historisch)',
+        locPrime: 'Beste Aurora-Zone',
+        locExcellent: 'Ausgezeichnet für Aurora',
+        locGood: 'Gute Aurora-Sichtbarkeit',
+        locModerate: 'Moderate Aurora-Chance',
+        locStrong: 'Aurora bei starken Stürmen',
+        locRare: 'Aurora nur bei seltenen Stürmen',
+        refreshing: 'Aktualisiere...',
+        releaseRefresh: 'Loslassen zum Aktualisieren'
+      },
+      es: {
+        title: 'PRONÓSTICO AURORA',
+        rightNow: 'Ahora mismo',
+        loading: 'Cargando datos de aurora...',
+        loadingSub: 'Obteniendo clima espacial de NOAA',
+        errorTitle: 'Error al cargar',
+        errorMsg: 'Verifica tu conexión',
+        tryAgain: 'Reintentar',
+        onboarding: 'Activa tu ubicación para un pronóstico personalizado basado en tu latitud y clima local.',
+        tonightForecast: 'Esta noche',
+        evening: 'Tarde',
+        midnight: 'Medianoche',
+        lateNight: 'Madrugada',
+        bestViewing: 'Mejor hora:',
+        lowActivity: 'Baja actividad esperada',
+        timeline: 'Línea de 10 días',
+        goodChance: 'Buena chance',
+        possible: 'Posible',
+        unlikely: 'Improbable',
+        tapHint: 'Toca para detalles',
+        updatedNow: 'Actualizado ahora',
+        updatedMins: 'Actualizado hace {n} min',
+        updatedMinsPlural: 'Actualizado hace {n} mins',
+        updatedAt: 'Actualizado a las {time}',
+        enableLocation: 'Activar ubicación',
+        updateLocation: 'Actualizar ubicación',
+        locating: 'Localizando...',
+        fetchingWeather: 'Obteniendo clima...',
+        locationFailed: 'Ubicación fallida',
+        locationHelp: 'Activa el acceso a ubicación en tu navegador',
+        statusGood: 'BUENA CHANCE',
+        statusPossible: 'POSIBLE',
+        statusUnlikely: 'IMPROBABLE',
+        subtitleGoodNight: '¡Sal y mira al norte!',
+        subtitleGoodDay: '¡Prepárate para esta noche!',
+        subtitlePossibleNight: 'Vale la pena mirar el cielo',
+        subtitlePossibleDay: 'Mantén un ojo en las condiciones',
+        subtitleUnlikelyNight: 'Baja actividad esta noche',
+        subtitleUnlikelyDay: 'La aurora necesita oscuridad',
+        today: 'Hoy',
+        tomorrow: 'Mañana',
+        yesterday: 'Ayer',
+        now: 'AHORA',
+        nowLabel: 'Ahora',
+        skyLabel: 'Cielo',
+        lookLabel: 'Mirar',
+        north: 'N',
+        south: 'S',
+        tooltipAurora: 'Aurora',
+        tooltipSky: 'Cielo',
+        tooltipConditions: 'Condiciones',
+        tooltipDark: 'Oscuro',
+        tooltipDaylight: 'Luz del día',
+        tooltipNoData: 'Sin datos (histórico)',
+        locPrime: 'Zona aurora principal',
+        locExcellent: 'Excelente para aurora',
+        locGood: 'Buena visibilidad de aurora',
+        locModerate: 'Chance moderada de aurora',
+        locStrong: 'Aurora durante tormentas fuertes',
+        locRare: 'Aurora solo en tormentas raras',
+        refreshing: 'Actualizando...',
+        releaseRefresh: 'Suelta para actualizar'
+      }
+    };
+
+    // Detect language
+    function detectLanguage() {
+      const lang = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+      if (lang.startsWith('de')) return 'de';
+      if (lang.startsWith('es')) return 'es';
+      return 'en';
+    }
+
+    const currentLang = detectLanguage();
+    const t = translations[currentLang];
+
     // State
     let currentKp = null;
     let kpForecast = [];
@@ -919,12 +1123,12 @@
     // User-friendly location description
     function getLocationDescription(lat) {
       const a = Math.abs(lat);
-      if (a >= 65) return 'Prime aurora zone';
-      if (a >= 60) return 'Excellent for aurora';
-      if (a >= 55) return 'Good aurora visibility';
-      if (a >= 50) return 'Moderate aurora chance';
-      if (a >= 45) return 'Aurora during strong storms';
-      return 'Aurora only during rare major storms';
+      if (a >= 65) return t.locPrime;
+      if (a >= 60) return t.locExcellent;
+      if (a >= 55) return t.locGood;
+      if (a >= 50) return t.locModerate;
+      if (a >= 45) return t.locStrong;
+      return t.locRare;
     }
 
     // Aurora probability (0-100)
@@ -967,11 +1171,12 @@
       const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
       const diffDays = Math.round((dateDay - today) / (24 * 60 * 60 * 1000));
 
-      if (diffDays === 0) return 'Today';
-      if (diffDays === 1) return 'Tomorrow';
-      if (diffDays === -1) return 'Yesterday';
-      if (diffDays < -1) return date.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' });
-      return date.toLocaleDateString('en-US', { weekday: 'short' });
+      const locale = currentLang === 'de' ? 'de-DE' : currentLang === 'es' ? 'es-ES' : 'en-US';
+      if (diffDays === 0) return t.today;
+      if (diffDays === 1) return t.tomorrow;
+      if (diffDays === -1) return t.yesterday;
+      if (diffDays < -1) return date.toLocaleDateString(locale, { weekday: 'short', day: 'numeric' });
+      return date.toLocaleDateString(locale, { weekday: 'short' });
     }
 
     // Fetch NOAA current Kp (returns both current value and historical data)
@@ -1038,17 +1243,18 @@
       const rect = e.target.closest('.chart-slot').getBoundingClientRect();
       const cloud = getCloudInfo(slot.cloud, slot.isNight);
       const status = getStatus(slot.prob);
+      const locale = currentLang === 'de' ? 'de-DE' : currentLang === 'es' ? 'es-ES' : 'en-US';
 
-      $('tooltip-title').textContent = slot.time.toLocaleTimeString('en-US', {
+      $('tooltip-title').textContent = slot.time.toLocaleTimeString(locale, {
         weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false
       });
       $('tooltip-chance').textContent = slot.prob + '%';
       if (slot.isPast && slot.cloud === null) {
-        $('tooltip-sky').textContent = 'No data (historical)';
+        $('tooltip-sky').textContent = t.tooltipNoData;
       } else {
         $('tooltip-sky').textContent = cloud.text + (slot.cloud !== null ? ` (${slot.cloud}%)` : '');
       }
-      $('tooltip-conditions').textContent = slot.isNight ? 'Dark' : 'Daylight';
+      $('tooltip-conditions').textContent = slot.isNight ? t.tooltipDark : t.tooltipDaylight;
 
       tooltip.style.left = Math.min(rect.left, window.innerWidth - 210) + 'px';
       tooltip.style.top = (rect.top - 120) + 'px';
@@ -1109,7 +1315,7 @@
                ontouchend="hideTooltip()"
                onmouseenter="showTooltip(event, chartSlots[${i}])"
                onmouseleave="hideTooltip()">
-            ${isNowSlot ? '<div class="now-marker">NOW</div>' : ''}
+            ${isNowSlot ? `<div class="now-marker">${t.now}</div>` : ''}
             <div class="slot-percent">${slot.prob > 0 ? slot.prob + '%' : ''}</div>
             <div class="slot-bar-container">
               <div class="slot-bar ${status} animate" data-height="${slot.prob}"></div>
@@ -1135,12 +1341,13 @@
         });
       });
 
-      // Scroll to NOW position after render
+      // Scroll to NOW position after render (NOW on left side for future visibility)
       setTimeout(() => {
         if (nowSlotIndex >= 0) {
           const nowEl = chartGrid.querySelector('.is-now');
           if (nowEl) {
-            const scrollPos = nowEl.offsetLeft - chartScroll.clientWidth / 2 + nowEl.clientWidth / 2;
+            // Position NOW near left edge (with small padding)
+            const scrollPos = nowEl.offsetLeft - 20;
             chartScroll.scrollLeft = Math.max(0, scrollPos);
           }
         }
@@ -1191,9 +1398,9 @@
 
       // Build the three slots
       const times = [
-        { time: evening, label: '21:00', name: 'Evening' },
-        { time: midnight, label: '00:00', name: 'Midnight' },
-        { time: lateNight, label: '03:00', name: 'Late Night' }
+        { time: evening, label: '21:00', name: t.evening },
+        { time: midnight, label: '00:00', name: t.midnight },
+        { time: lateNight, label: '03:00', name: t.lateNight }
       ];
 
       // Sort by time
@@ -1226,9 +1433,9 @@
       // Show best time recommendation
       const tonightBest = $('tonight-best');
       if (bestProb >= 25) {
-        tonightBest.innerHTML = `Best viewing: <strong>${bestSlot.label}</strong> (${bestProb}%)`;
+        tonightBest.innerHTML = `${t.bestViewing} <strong>${bestSlot.label}</strong> (${bestProb}%)`;
       } else {
-        tonightBest.textContent = 'Low activity expected tonight';
+        tonightBest.textContent = t.lowActivity;
       }
     }
 
@@ -1247,25 +1454,25 @@
 
       if (status === 'good') {
         statusEmoji.textContent = '✨';
-        statusText.textContent = 'GOOD CHANCE';
+        statusText.textContent = t.statusGood;
         statusText.className = 'status-text good-text';
-        statusSubtitle.textContent = isNight ? 'Head outside and look north!' : 'Get ready for tonight!';
+        statusSubtitle.textContent = isNight ? t.subtitleGoodNight : t.subtitleGoodDay;
       } else if (status === 'possible') {
         statusEmoji.textContent = '🌌';
-        statusText.textContent = 'POSSIBLE';
+        statusText.textContent = t.statusPossible;
         statusText.className = 'status-text possible-text';
-        statusSubtitle.textContent = isNight ? 'Worth checking the sky' : 'Keep an eye on conditions';
+        statusSubtitle.textContent = isNight ? t.subtitlePossibleNight : t.subtitlePossibleDay;
       } else {
         statusEmoji.textContent = isNight ? '🌙' : '💤';
-        statusText.textContent = 'UNLIKELY';
+        statusText.textContent = t.statusUnlikely;
         statusText.className = 'status-text unlikely-text';
-        statusSubtitle.textContent = isNight ? 'Low activity tonight' : 'Aurora needs darkness';
+        statusSubtitle.textContent = isNight ? t.subtitleUnlikelyNight : t.subtitleUnlikelyDay;
       }
 
       // Stats
       statChance.textContent = prob + '%';
       statClouds.textContent = cloudInfo.icon;
-      statDirection.textContent = userLocation ? (userLocation.lat >= 0 ? 'N' : 'S') : 'N';
+      statDirection.textContent = userLocation ? (userLocation.lat >= 0 ? t.north : t.south) : t.north;
     }
 
     // Onboarding
@@ -1313,15 +1520,16 @@
 
       const now = new Date();
       const diff = Math.floor((now - lastUpdateTime) / 1000);
+      const locale = currentLang === 'de' ? 'de-DE' : currentLang === 'es' ? 'es-ES' : 'en-US';
 
       let text;
       if (diff < 60) {
-        text = 'Updated just now';
+        text = t.updatedNow;
       } else if (diff < 3600) {
         const mins = Math.floor(diff / 60);
-        text = `Updated ${mins} min${mins > 1 ? 's' : ''} ago`;
+        text = (mins > 1 ? t.updatedMinsPlural : t.updatedMins).replace('{n}', mins);
       } else {
-        text = `Updated at ${lastUpdateTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
+        text = t.updatedAt.replace('{time}', lastUpdateTime.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }));
       }
 
       updateTimeEl.textContent = text;
@@ -1342,7 +1550,7 @@
 
       if (pullDistance > 60 && window.scrollY === 0) {
         pullIndicator.classList.add('visible');
-        pullText.textContent = 'Release to refresh';
+        pullText.textContent = t.releaseRefresh;
       }
     }
 
@@ -1353,7 +1561,7 @@
       isPulling = false;
 
       if (pullDistance > 60 && window.scrollY === 0) {
-        pullText.textContent = 'Refreshing...';
+        pullText.textContent = t.refreshing;
         pullIndicator.classList.add('refreshing');
 
         await init();
@@ -1369,7 +1577,7 @@
     // Location handler
     async function handleLocation() {
       locationBtn.disabled = true;
-      locationBtnText.textContent = 'Locating...';
+      locationBtnText.textContent = t.locating;
 
       try {
         const pos = await new Promise((resolve, reject) => {
@@ -1383,13 +1591,13 @@
         userLocation = { lat: pos.coords.latitude, lon: pos.coords.longitude };
         localStorage.setItem('auroraLocation', JSON.stringify(userLocation));
 
-        locationBtnText.textContent = 'Fetching weather...';
+        locationBtnText.textContent = t.fetchingWeather;
         cloudCover = await fetchCloudCover(userLocation.lat, userLocation.lon);
 
         const desc = getLocationDescription(userLocation.lat);
         locationStatus.textContent = `${userLocation.lat.toFixed(1)}°${userLocation.lat >= 0 ? 'N' : 'S'} · ${desc}`;
         locationStatus.className = 'location-status has-location';
-        locationBtnText.textContent = 'Update Location';
+        locationBtnText.textContent = t.updateLocation;
 
         onboardingEl.classList.add('hidden');
         updateStatus();
@@ -1397,14 +1605,56 @@
         renderTonightForecast();
 
       } catch (err) {
-        locationBtnText.textContent = 'Location failed';
-        locationStatus.textContent = 'Enable location access in your browser settings';
+        locationBtnText.textContent = t.locationFailed;
+        locationStatus.textContent = t.locationHelp;
         setTimeout(() => {
-          locationBtnText.textContent = 'Try Again';
+          locationBtnText.textContent = t.tryAgain;
         }, 2000);
       }
 
       locationBtn.disabled = false;
+    }
+
+    // Initialize UI with translations
+    function initUI() {
+      // Header
+      $('app-title').textContent = t.title;
+
+      // Loading
+      $('loading-text').textContent = t.loading;
+      $('loading-subtext').textContent = t.loadingSub;
+
+      // Error
+      $('error-title').textContent = t.errorTitle;
+      $('error-message').textContent = t.errorMsg;
+      $('error-retry').textContent = t.tryAgain;
+
+      // Onboarding
+      $('onboarding-text').textContent = t.onboarding;
+
+      // Status card
+      $('status-time-label').textContent = t.rightNow;
+      $('stat-now-label').textContent = t.nowLabel;
+      $('stat-sky-label').textContent = t.skyLabel;
+      $('stat-look-label').textContent = t.lookLabel;
+
+      // Tonight section
+      $('tonight-header').textContent = t.tonightForecast;
+
+      // Chart section
+      $('chart-title').textContent = t.timeline;
+      $('legend-good').textContent = t.goodChance;
+      $('legend-possible').textContent = t.possible;
+      $('legend-unlikely').textContent = t.unlikely;
+      $('tap-hint-text').textContent = t.tapHint;
+
+      // Location button
+      locationBtnText.textContent = t.enableLocation;
+
+      // Tooltip labels
+      $('tooltip-aurora-label').textContent = t.tooltipAurora;
+      $('tooltip-sky-label').textContent = t.tooltipSky;
+      $('tooltip-conditions-label').textContent = t.tooltipConditions;
     }
 
     // Init
@@ -1424,7 +1674,7 @@
             const desc = getLocationDescription(userLocation.lat);
             locationStatus.textContent = `${userLocation.lat.toFixed(1)}°${userLocation.lat >= 0 ? 'N' : 'S'} · ${desc}`;
             locationStatus.className = 'location-status has-location';
-            locationBtnText.textContent = 'Update Location';
+            locationBtnText.textContent = t.updateLocation;
           } catch (e) {
             console.error('Cloud fetch failed:', e);
           }
@@ -1481,6 +1731,7 @@
     }
 
     // Start
+    initUI();
     init();
 
     // Refresh data every 15 minutes
