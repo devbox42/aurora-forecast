@@ -1049,6 +1049,7 @@
         updatedMins: 'Updated {n} min ago',
         updatedMinsPlural: 'Updated {n} mins ago',
         updatedAt: 'Updated at {time}',
+        nextUpdate: 'Next in {time}',
         enableLocation: 'Enable Location',
         updateLocation: 'Update Location',
         locating: 'Locating...',
@@ -1152,6 +1153,7 @@
         updatedMins: 'Vor {n} Min. aktualisiert',
         updatedMinsPlural: 'Vor {n} Min. aktualisiert',
         updatedAt: 'Aktualisiert um {time}',
+        nextUpdate: 'Nächstes in {time}',
         enableLocation: 'Standort aktivieren',
         updateLocation: 'Standort aktualisieren',
         locating: 'Ortung...',
@@ -1255,6 +1257,7 @@
         updatedMins: 'Actualizado hace {n} min',
         updatedMinsPlural: 'Actualizado hace {n} mins',
         updatedAt: 'Actualizado a las {time}',
+        nextUpdate: 'Próximo en {time}',
         enableLocation: 'Activar ubicación',
         updateLocation: 'Actualizar ubicación',
         locating: 'Localizando...',
@@ -2414,6 +2417,8 @@
     }
 
     // Update timestamp
+    const REFRESH_INTERVAL = 15 * 60; // 15 minutes in seconds
+
     function updateTimestamp() {
       if (!lastUpdateTime) return;
 
@@ -2421,6 +2426,7 @@
       const diff = Math.floor((now - lastUpdateTime) / 1000);
       const locale = currentLang === 'de' ? 'de-DE' : currentLang === 'es' ? 'es-ES' : 'en-US';
 
+      // Time since last update
       let text;
       if (diff < 60) {
         text = t.updatedNow;
@@ -2431,7 +2437,14 @@
         text = t.updatedAt.replace('{time}', lastUpdateTime.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }));
       }
 
-      updateTimeEl.textContent = text;
+      // Countdown to next update
+      const remaining = Math.max(0, REFRESH_INTERVAL - diff);
+      const remainMins = Math.floor(remaining / 60);
+      const remainSecs = remaining % 60;
+      const countdown = `${remainMins}:${remainSecs.toString().padStart(2, '0')}`;
+      const nextText = (t.nextUpdate || 'Next in {time}').replace('{time}', countdown);
+
+      updateTimeEl.textContent = `${text} · ${nextText}`;
     }
 
     // Pull to refresh
@@ -2777,8 +2790,8 @@
       });
     }, 15 * 60 * 1000);
 
-    // Update timestamp every minute
-    setInterval(updateTimestamp, 60 * 1000);
+    // Update timestamp every second (for countdown)
+    setInterval(updateTimestamp, 1000);
   </script>
 </body>
 </html>
