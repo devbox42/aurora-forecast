@@ -2383,7 +2383,7 @@
         cloudCover = weatherData.hourly;
         window.sunTimes = weatherData.daily;
 
-        locationChipText.textContent = t.updateLocation;
+        locationChipText.textContent = `${Math.abs(userLocation.lat).toFixed(1)}°${userLocation.lat >= 0 ? 'N' : 'S'}`;
 
         onboardingEl.classList.add('hidden');
         updateStatus();
@@ -2480,7 +2480,7 @@
             ]);
             cloudCover = weatherData.hourly;
             window.sunTimes = weatherData.daily;
-            locationChipText.textContent = t.updateLocation;
+            locationChipText.textContent = `${Math.abs(userLocation.lat).toFixed(1)}°${userLocation.lat >= 0 ? 'N' : 'S'}`;
           } catch (e) {
             console.error('Weather fetch failed:', e);
           }
