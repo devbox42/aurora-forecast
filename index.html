@@ -1355,7 +1355,6 @@
     const pullText = $('pull-text');
     const locationChip = $('location-chip');
     const locationChipText = $('location-chip-text');
-    const locationStatus = $('location-status');
     const tooltip = $('tooltip');
 
     // Kp threshold by latitude
@@ -2384,9 +2383,6 @@
         cloudCover = weatherData.hourly;
         window.sunTimes = weatherData.daily;
 
-        const desc = getLocationDescription(userLocation.lat);
-        locationStatus.textContent = `${userLocation.lat.toFixed(1)}°${userLocation.lat >= 0 ? 'N' : 'S'} · ${desc}`;
-        locationStatus.className = 'location-status has-location';
         locationChipText.textContent = t.updateLocation;
 
         onboardingEl.classList.add('hidden');
@@ -2401,16 +2397,6 @@
       } catch (err) {
         console.error('Location error:', err);
         locationChipText.textContent = t.locationFailed;
-        // Show more specific error message
-        if (err.code === 1) {
-          locationStatus.textContent = t.locationHelp; // Permission denied
-        } else if (err.code === 2) {
-          locationStatus.textContent = 'Position unavailable';
-        } else if (err.code === 3) {
-          locationStatus.textContent = 'Location timeout';
-        } else {
-          locationStatus.textContent = err.message || t.locationHelp;
-        }
         setTimeout(() => {
           locationChipText.textContent = t.tryAgain;
         }, 2000);
@@ -2494,9 +2480,6 @@
             ]);
             cloudCover = weatherData.hourly;
             window.sunTimes = weatherData.daily;
-            const desc = getLocationDescription(userLocation.lat);
-            locationStatus.textContent = `${userLocation.lat.toFixed(1)}°${userLocation.lat >= 0 ? 'N' : 'S'} · ${desc}`;
-            locationStatus.className = 'location-status has-location';
             locationChipText.textContent = t.updateLocation;
           } catch (e) {
             console.error('Weather fetch failed:', e);
