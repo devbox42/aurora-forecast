@@ -2367,9 +2367,14 @@
     document.addEventListener('touchmove', handleTouchMove, { passive: true });
     document.addEventListener('touchend', handleTouchEnd);
 
-    // Service worker
+    // Service worker (with cache bust)
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').catch(() => {});
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        registrations.forEach(r => r.unregister());
+      });
+      setTimeout(() => {
+        navigator.serviceWorker.register('sw.js?v=24').catch(() => {});
+      }, 100);
     }
 
     // Start
