@@ -1,4 +1,4 @@
-const CACHE_NAME = 'aurora-v18';
+const CACHE_NAME = 'aurora-v19';
 const ASSETS = [
   './',
   './index.html',
