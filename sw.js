@@ -1,10 +1,10 @@
-const CACHE_NAME = 'aurora-v12';
+const CACHE_NAME = 'aurora-v13';
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png'
+  './',
+  './index.html',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 // Install: cache static assets

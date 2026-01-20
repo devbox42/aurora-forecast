@@ -2,7 +2,7 @@
   "name": "Aurora Forecast",
   "short_name": "Aurora",
   "description": "Aurora borealis viewing probability based on space weather and cloud cover",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#0a0a0a",
   "theme_color": "#0a0a0a",
