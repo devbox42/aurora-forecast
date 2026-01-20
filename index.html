@@ -730,7 +730,7 @@
 
       <div class="chart-section">
         <div class="section-header">
-          <span class="section-title">5-Day Timeline</span>
+          <span class="section-title">10-Day Timeline</span>
         </div>
         <div id="chart-container" class="chart-container scroll-right">
           <div id="chart-scroll" class="chart-scroll">
@@ -974,12 +974,12 @@
       const utcAlignedHour = Math.floor(utcHour / 3) * 3;
       currentBlock.setUTCHours(utcAlignedHour, 0, 0, 0);
 
-      // Start 2 days (16 slots × 3h = 48h) before current block
-      let t = new Date(currentBlock.getTime() - 16 * 3 * 60 * 60 * 1000);
+      // Start 7 days (56 slots × 3h = 168h) before current block
+      let t = new Date(currentBlock.getTime() - 56 * 3 * 60 * 60 * 1000);
 
-      // 40 slots total: 16 historical + 24 forecast = 120 hours (5 days)
+      // 80 slots total: 56 historical + 24 forecast = 240 hours (10 days)
       let nowSlotIndex = -1;
-      for (let i = 0; i < 40; i++) {
+      for (let i = 0; i < 80; i++) {
         const localHour = t.getHours();
         const isNight = localHour >= 20 || localHour < 6;
         const kp = getKpAt(t);
@@ -1035,7 +1035,7 @@
           setTimeout(() => {
             bar.style.height = bar.dataset.height + '%';
             bar.classList.remove('animate');
-          }, i * 30); // Faster animation for more bars
+          }, i * 15); // Fast animation for many bars
         });
       });
 
