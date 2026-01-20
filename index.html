@@ -2010,20 +2010,20 @@
 
       // Hide scroll hint after first scroll
       if (scrollLeft > 20) {
-        scrollHint.classList.add('hidden-hint');
+        if (scrollHint) scrollHint.classList.add('hidden-hint');
         localStorage.setItem('scrollHintSeen', 'true');
       }
     }
 
     // Tap hint for first-time users
     function checkTapHint() {
-      if (!localStorage.getItem('tapHintSeen')) {
+      if (tapHint && !localStorage.getItem('tapHintSeen')) {
         tapHint.classList.remove('hidden');
       }
     }
 
     function hideTapHint() {
-      tapHint.classList.add('hidden');
+      if (tapHint) tapHint.classList.add('hidden');
       localStorage.setItem('tapHintSeen', 'true');
     }
 
@@ -2233,7 +2233,7 @@
         setTimeout(updateScrollIndicators, 100);
 
         // Hide scroll hint if already seen
-        if (localStorage.getItem('scrollHintSeen')) {
+        if (scrollHint && localStorage.getItem('scrollHintSeen')) {
           scrollHint.classList.add('hidden-hint');
         }
 
