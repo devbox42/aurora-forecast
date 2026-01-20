@@ -143,6 +143,24 @@
     .g-scale-badge.g4 { background: #991b1b; color: #fca5a5; }
     .g-scale-badge.g5 { background: #7f1d1d; color: #fecaca; }
 
+    /* Alert Banner */
+    .alert-banner {
+      background: linear-gradient(135deg, #7c2d12 0%, #991b1b 100%);
+      border: 1px solid #dc2626;
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin: 8px 0 12px;
+      font-size: 0.85rem;
+      color: #fecaca;
+      text-align: center;
+      animation: alertPulse 2s ease-in-out infinite;
+    }
+    .alert-banner.hidden { display: none; }
+    @keyframes alertPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+
     /* Peak Window */
     .peak-window {
       background: #0d0d18;
@@ -832,6 +850,7 @@
           <span id="status-emoji">🌙</span>
         </div>
         <div id="status-text" class="status-text unlikely-text">Checking...</div>
+        <div id="alert-banner" class="alert-banner hidden"></div>
         <div id="g-scale-badge" class="g-scale-badge g0">G0</div>
 
         <div id="peak-window" class="peak-window">
@@ -1104,7 +1123,10 @@
         kpSpikeTitle: 'Aurora Alert!',
         kpSpikeBody: 'Kp index jumped to {kp} ({g}) - check for aurora!',
         aceAlertTitle: 'Aurora Incoming!',
-        aceAlertBody: 'Solar wind spike detected! Aurora possible in ~{mins} minutes'
+        aceAlertBody: 'Solar wind spike detected! Aurora possible in ~{mins} minutes',
+        // Alert banner
+        alertStorm: '⚠️ G3+ Storm! Check the sky even at lower latitudes.',
+        alertActive: '⚠️ NOAA Alert active - see Details'
       },
       de: {
         title: 'POLARLICHT-VORHERSAGE',
@@ -1204,7 +1226,10 @@
         kpSpikeTitle: 'Polarlicht-Alarm!',
         kpSpikeBody: 'Kp-Index auf {kp} ({g}) gestiegen - schau nach Polarlichtern!',
         aceAlertTitle: 'Polarlicht im Anflug!',
-        aceAlertBody: 'Sonnenwind-Spitze erkannt! Aurora möglich in ~{mins} Minuten'
+        aceAlertBody: 'Sonnenwind-Spitze erkannt! Aurora möglich in ~{mins} Minuten',
+        // Alert banner
+        alertStorm: '⚠️ G3+ Sturm! Auch in niedrigeren Breiten möglich.',
+        alertActive: '⚠️ NOAA-Warnung aktiv - siehe Details'
       },
       es: {
         title: 'PRONÓSTICO AURORA',
@@ -1304,7 +1329,10 @@
         kpSpikeTitle: '¡Alerta de aurora!',
         kpSpikeBody: 'Índice Kp subió a {kp} ({g}) - ¡busca auroras!',
         aceAlertTitle: '¡Aurora en camino!',
-        aceAlertBody: '¡Pico de viento solar detectado! Aurora posible en ~{mins} minutos'
+        aceAlertBody: '¡Pico de viento solar detectado! Aurora posible en ~{mins} minutos',
+        // Alert banner
+        alertStorm: '⚠️ ¡Tormenta G3+! Posible incluso en latitudes bajas.',
+        alertActive: '⚠️ Alerta NOAA activa - ver Detalles'
       }
     };
 
@@ -2225,6 +2253,24 @@
         const g = getGScale(currentKp);
         gScaleBadge.textContent = g.label;
         gScaleBadge.className = 'g-scale-badge ' + g.class;
+      }
+
+      // Alert Banner for extreme conditions
+      const alertBanner = $('alert-banner');
+      const isExtreme = currentKp >= 7 || (dstIndex && dstIndex.value < -100);
+      const hasAlerts = noaaAlerts && noaaAlerts.length > 0;
+
+      if (isExtreme || hasAlerts) {
+        let alertText = '';
+        if (currentKp >= 7) {
+          alertText = t.alertStorm || '⚠️ G3+ Storm active! Check the sky even at lower latitudes.';
+        } else if (hasAlerts) {
+          alertText = t.alertActive || '⚠️ NOAA Alert active - see Details';
+        }
+        alertBanner.textContent = alertText;
+        alertBanner.classList.remove('hidden');
+      } else {
+        alertBanner.classList.add('hidden');
       }
 
       // Peak Window display
